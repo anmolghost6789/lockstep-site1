@@ -1,0 +1,50 @@
+# Local Claude overrides (committed templates: settings.template.json, settings.local.template.json)
+
+.claude/settings.local.json
+.claude/settings.local.example.json
+CLAUDE.local.md
+
+# Secrets and credentials
+# Environment is centralized at the repository root; do not add skill-local
+# .env templates or runtime env files.
+.env
+.env.*
+.jira_config.json
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Runtime-created output tree — outputs/ is the single working tree.
+# Ignore everything the agent writes there; keep only the folder docs.
+outputs/*
+!outputs/README.md
+!outputs/.gitkeep
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node and frontend caches
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/

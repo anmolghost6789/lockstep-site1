@@ -1,0 +1,121 @@
+{
+  "project_name": "ADLC Agent",
+  "version": "1.0.0",
+  "organization": "acme-corp",
+  "timezone": "Asia/Kolkata",
+  "model_gateway": {
+    "description": "All model calls route through the enterprise gateway. The VS Code extension and Claude Code read ANTHROPIC_BASE_URL from managed settings.",
+    "base_url_env": "ANTHROPIC_BASE_URL",
+    "required": true
+  },
+  "models": {
+    "description": "Pinned per phase. Changing a pin is an ADR in phase 2 and resets G2.",
+    "discover-define": "claude-sonnet-5",
+    "architect-design": "claude-opus-5-5",
+    "build-orchestrate": "claude-sonnet-5",
+    "evaluate-validate": "claude-opus-5-5",
+    "release-operate": "claude-sonnet-5",
+    "observe-evolve": "claude-sonnet-5"
+  },
+  "subagent_thresholds": {
+    "requirements_analyst_min_files": 15,
+    "requirements_analyst_min_mb": 15,
+    "solution_architect_min_units": 8,
+    "solution_architect_min_systems": 2,
+    "bolt_builder_min_independent_units": 3
+  },
+  "bolts": {
+    "max_files_changed_per_bolt": 12,
+    "max_minutes_per_bolt": 30,
+    "require_tests_per_bolt": true
+  },
+  "evaluation": {
+    "default_thresholds": {
+      "task_accuracy": 0.9,
+      "groundedness": 0.9,
+      "citation_precision": 0.85,
+      "safety_violations": 0,
+      "p95_latency_seconds": 5,
+      "cost_per_task_usd": 0.25
+    },
+    "min_eval_cases": 200,
+    "evaluator_independence": "evaluator subagent must not have authored code under evaluation"
+  },
+  "release": {
+    "initial_rollout_percent": 10,
+    "require_rollback_rehearsal": true,
+    "risk_levels": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+    ]
+  },
+  "data_classification": {
+    "levels": [
+      "public",
+      "internal",
+      "confidential",
+      "restricted"
+    ],
+    "copy_into_artifacts_max_level": "internal",
+    "restricted_handling": "reference by pointer only; never copy content into artifacts, prompts, memory or chat"
+  },
+  "policy_packs": {
+    "discover-define": [
+      "no_secrets",
+      "pii_scan",
+      "trace_ids_present"
+    ],
+    "architect-design": [
+      "no_secrets",
+      "model_pins_approved",
+      "mcp_allowlist",
+      "trace_ids_present"
+    ],
+    "build-orchestrate": [
+      "no_secrets",
+      "pii_scan",
+      "mcp_allowlist",
+      "tests_per_bolt",
+      "license_scan"
+    ],
+    "evaluate-validate": [
+      "evaluator_independence",
+      "thresholds_from_aiprs",
+      "min_eval_cases"
+    ],
+    "release-operate": [
+      "no_secrets",
+      "sbom_present",
+      "rollback_plan",
+      "versions_pinned"
+    ],
+    "observe-evolve": [
+      "pii_scan",
+      "trace_ids_present"
+    ]
+  },
+  "audit": {
+    "retention_days": 2555,
+    "export_formats": [
+      "jsonl",
+      "csv"
+    ],
+    "siem_forwarding": "optional: forward adlc/.audit/audit.jsonl via your log shipper"
+  },
+  "gate_mode": {
+    "description": "github: gates are pull request reviews routed by CODEOWNERS and enforced by branch protection (default). local: gates are recorded by scripts/adlc_gate.py, for environments without GitHub.",
+    "value": "github"
+  },
+  "github": {
+    "default_branch": "main",
+    "branch_prefix": "adlc/",
+    "codeowners_path": ".github/CODEOWNERS",
+    "gate_label_prefix": "adlc-gate-"
+  },
+  "telemetry": {
+    "description": "Opt-in delivery metrics sent to your Lockstep registry by metrics.py push. Numbers and IDs only; never artifact text, code, prompts or personal data.",
+    "push": false
+  }
+}

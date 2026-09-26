@@ -1,0 +1,72 @@
+{
+  "env": {
+    "CLAUDE_STREAM_IDLE_TIMEOUT_MS": "600000",
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "1200000",
+    "MAX_THINKING_TOKENS": "4000",
+    "CLAUDE_AUTO_COMPACT_THRESHOLD_PERCENT": "50"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(command -v python3)",
+      "Bash(command -v python)",
+      "Bash(python3 -m json.tool *)",
+      "Bash(python -m json.tool *)",
+      "Bash(python3 .claude/skills/requirements-agent/scripts/md_to_docx.py *)",
+      "Bash(python .claude/skills/requirements-agent/scripts/md_to_docx.py *)",
+      "Bash(python3 .claude/skills/requirements-agent/scripts/validate_requirements.py *)",
+      "Bash(python .claude/skills/requirements-agent/scripts/validate_requirements.py *)",
+      "Bash(python3 -m pip install -r .claude/skills/requirements-agent/scripts/requirements.txt)",
+      "Bash(python -m pip install -r .claude/skills/requirements-agent/scripts/requirements.txt)",
+      "Bash(git status)",
+      "Bash(git status --short)",
+      "Bash(git rev-parse --show-toplevel)",
+      "Bash(git branch --show-current)",
+      "Bash(git diff --stat *)",
+      "Bash(git diff -- *)",
+      "Bash(cd ../../ && ls runs/ 2>/dev/null | head -20)",
+      "Read(../../build-skill-package/.claude/skills/**)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(secrets/**)",
+      "Read(credentials/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$PWD}\" && bash .claude/hooks/load-run-state.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-$PWD}\" && python3 .claude/hooks/lint-output.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": [
+      "Thinking"
+    ]
+  }
+}

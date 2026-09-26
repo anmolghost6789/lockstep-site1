@@ -1,0 +1,48 @@
+version: 1.0
+purpose: What each phase template must contain, so validate_artifact.py and reviewers check the same thing.
+templates:
+  01-aiprs:
+    file: templates/01-aiprs.template.md
+    sections: [Intent, Personas, User Stories, Functional Requirements, Non-Functional Requirements, Risks and Constraints, Success Criteria, Open Questions]
+    id_prefixes: [P, US, FR, NFR, RISK, SC]
+    rules:
+      - every FR has an acceptance test
+      - every NFR measured in phase 04 states its threshold here
+      - every SC has a baseline, target and window
+  02-blueprint:
+    file: templates/02-blueprint.template.md
+    sections: [Context, Level-1 Plan, Agent Topology, Model Selection, Knowledge and RAG Design, Tools and MCP Integration, Security and Governance, Decisions]
+    id_prefixes: [UNIT, AGT, ADR]
+    companions: [adlc/adr/ADR-NNN-*.md]
+    rules:
+      - every unit traces to at least one FR
+      - every agent that takes external actions names its human-in-the-loop control
+      - models only from config/governance/model_policy.json
+  03-units:
+    file: templates/03-units.template.yaml
+    required_keys: [intent_id, blueprint_sha256, units]
+    id_prefixes: [UNIT, BOLT]
+    rules:
+      - every bolt records tests_run and tests_passed
+      - every unit records its pull request and reviewer
+  04-scorecard:
+    file: templates/04-scorecard.schema.json
+    required_keys: [intent_id, evaluated_build, metrics, verdict, evaluator]
+    id_prefixes: [EVAL]
+    rules:
+      - every metric traces to an NFR or SC
+      - verdict is pass only if every metric passes
+  05-release:
+    file: templates/05-release.template.md
+    sections: [Release Summary, Versions, Deployment Plan, Rollback Plan, Runbook, Risk Assessment, Readiness Checklist]
+    id_prefixes: [REL]
+    rules:
+      - no unpinned versions (latest, main, HEAD, *)
+      - rollback triggers stated as numbers
+  06-backlog:
+    file: templates/06-backlog.template.md
+    sections: [Observation Window, Outcome vs Success Criteria, Incidents and Drift, Backlog, Next Intent]
+    id_prefixes: [OBS, BL]
+    rules:
+      - at most one backlog item marked next_intent
+source_of_truth: workflow_manifest.json (requiredSections, requiredKeys, idPrefixes)

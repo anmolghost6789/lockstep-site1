@@ -1,0 +1,15 @@
+# Requirements Agent script dependencies
+# md_to_docx.py, and ingest_inputs.py (deterministic .docx/.pdf/.xlsx/.pptx
+# input ingestion). ingest_inputs.py degrades gracefully if a reader is absent.
+
+python-docx>=1.1.2,<2.0.0
+openpyxl>=3.1.2,<4.0.0
+pdfplumber>=0.11.0
+python-pptx>=0.6.23
+svglib>=1.5.1
+reportlab>=4.0.0
+PyYAML>=6.0,<7.0
+# reportlab 4.x rasterises SVG via the rlPyCairo backend (uses the
+# libcairo2 system lib already installed in the Docker image); without it
+# md_to_docx.py cannot embed an SVG brand logo and silently skips it.
+rlPyCairo>=0.3.0

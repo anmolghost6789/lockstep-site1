@@ -1,0 +1,115 @@
+# Playground UI + run scaffold contract for the requirements skill package.
+# Edit this file (or add folders under inputs/ / context/) — restart backend
+# and hard-refresh the UI to pick up changes.
+
+version: 1
+
+# Next-step recommendation contract. The playground shells out to `script` (with
+# --seed) at run creation. progress.json lives at the run root and is the single
+# source of truth for done / current / next. The agent writes every deliverable
+# directly into its numbered outputs/ folder — there is no separate publish/mirror
+# step, so this layout declares no publish rules.
+progress:
+  script: .claude/skills/requirements-agent/scripts/seed_progress.py
+  file: progress.json
+  reconcile_args:
+    - --recover
+
+# Load-bearing, agent-owned projections run after an input upload or deletion.
+# They do not interpret requirements: ingestion updates the current content
+# manifest; the knowledge layer preserves stable source IDs and invalidates only
+# phases whose source or entity hashes differ.
+input_change:
+  ingest_script: .claude/skills/requirements-agent/scripts/ingest_inputs.py
+  state_script: .claude/skills/requirements-agent/scripts/knowledge_layer.py
+
+inputs:
+  - id: instructions
+    label: Run instructions
+    desc: Output selection, scope focus, file-usage rules
+    icon: ScrollText
+  - id: templates
+    label: Document templates
+    desc: Dynamic BRD, FRD, URS, and Jira markdown templates
+    icon: LayoutTemplate
+  - id: scope_and_requirements
+    label: Scope & requirements
+    desc: Charters, BRDs, requirement specs
+    icon: FileText
+  - id: transcripts
+    label: Transcripts
+    desc: Meetings, interviews, workshops
+    icon: Mic
+  - id: data_contracts
+    label: Data contracts
+    desc: Schemas, mappings, source systems
+    icon: Database
+  - id: additional_documents
+    label: Additional documents
+    desc: Examples, mixed references, and supplemental packs
+    icon: BookOpen
+
+context_scaffold:
+  - context/guidance
+  - context/branding
+  - context/reference
+
+context:
+  - id: guidance
+    label: Guidance
+    folderPath: context/guidance/
+    desc: Durable enterprise, domain, and project rules
+    icon: BookOpen
+    children:
+      - id: enterprise_context
+        label: Enterprise
+        desc: Org-wide standards, policies
+        icon: FileText
+        pathMatch: enterprise
+      - id: domain_context
+        label: Domain
+        desc: Domain data standards
+        icon: BookOpen
+        pathMatch: domain
+      - id: project_context
+        label: Project
+        desc: Project charter, scope
+        icon: ScrollText
+        pathMatch: project
+  - id: branding
+    label: Branding
+    folderPath: context/branding/
+    desc: Logos, DOCX export rules
+    icon: Image
+  - id: reference
+    label: Reference
+    folderPath: context/reference/
+    desc: Prior examples, standards
+    icon: FolderOpen
+
+project_context:
+  - id: enterprise_context
+    label: Enterprise
+    description: Org-wide standards, policies, glossaries
+    folderPath: context/guidance/
+    icon: FileText
+  - id: domain_context
+    label: Domain
+    description: Domain-specific data standards and terminologies
+    folderPath: context/guidance/
+    icon: BookOpen
+  - id: project_context
+    label: Project
+    description: Project charter, scope, stakeholder notes
+    folderPath: context/guidance/
+    icon: ScrollText
+  - id: branding
+    label: Branding
+    description: Logos, color palette, DOCX export rules
+    folderPath: context/branding/
+    icon: Image
+  - id: reference
+    label: Reference material
+    description: Prior deliverables, examples, standards, and additional material
+    folderPath: context/reference/
+    icon: FolderOpen

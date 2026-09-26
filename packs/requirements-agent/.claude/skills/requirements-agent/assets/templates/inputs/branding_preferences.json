@@ -1,0 +1,29 @@
+{
+  "client_name": "Client Name",
+  "project_name": "Project Name",
+  "primary_color": "1F4E79",
+  "accent_color": "D9EAF7",
+  "secondary_accent": "F2F2F2",
+  "font_name": "Aptos",
+  "logo_path": null,
+  "footer_text": "Prepared by Requirements Agent",
+  "confidentiality": "Confidential",
+  "include_revision_table": true,
+  "include_signoff_table": true,
+  "docx": {
+    "font_name": "Aptos",
+    "heading_color": "1F4E79",
+    "table_header_color": "1F4E79",
+    "footer_text": "Prepared by Requirements Agent",
+    "confidentiality": "Confidential",
+    "include_cover_page": true,
+    "include_footer": true,
+    "toc_max_level": 3,
+    "margins_inches": {
+      "top": 0.7,
+      "bottom": 0.7,
+      "left": 0.75,
+      "right": 0.75
+    }
+  }
+}

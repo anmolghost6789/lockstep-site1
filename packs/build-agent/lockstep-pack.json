@@ -1,0 +1,19 @@
+{
+  "name": "build-agent",
+  "version": "5.4.0",
+  "publisher": "ZS Associates",
+  "icon": "hammer",
+  "description": "STTM-to-code for data engineering: plans the build from the approved mappings, then generates DDL, DML, data quality checks, pipelines and tests, with an independent evaluation of the result.",
+  "categories": [
+    "Data engineering",
+    "Build",
+    "Code generation"
+  ],
+  "examples": [
+    "Plan the build from this STTM",
+    "Generate the DDL and DML for these mappings",
+    "Generate data quality checks and tests"
+  ],
+  "homepage": "",
+  "license": "Proprietary"
+}

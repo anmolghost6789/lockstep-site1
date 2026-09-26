@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://build-agent.local/schemas/semantic_checks.schema.json",
+  "title": "Build Agent semantic_checks.json",
+  "description": "Structured output of the semantic anomaly checklist run during /start-build-run. Lives at state/run_id_<ID>/discovery/semantic_checks.json. Missing file blocks phase transition to /analyze-inputs.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "generated_at", "checks"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checks": {
+      "type": "array",
+      "description": "One entry per check_id defined in references/input_validation.md. Every check must be represented even if status is n/a.",
+      "items": { "$ref": "#/$defs/check_entry" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "check_entry": {
+      "type": "object",
+      "required": ["check_id", "severity", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "enum": [
+            "C-XDC-01",
+            "C-QSV-01",
+            "M-KG-01",
+            "M-WO-01",
+            "M-AB-01",
+            "N-RM-01"
+          ],
+          "description": "Stable check identifier from input_validation.md."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "major", "minor"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["passed", "flagged", "n/a"]
+        },
+        "detail": {
+          "type": "string",
+          "description": "One-sentence human-readable summary. Required when status is flagged."
+        },
+        "n_a_reason": {
+          "type": "string",
+          "description": "Why the check is not applicable. Required when status is n/a."
+        },
+        "evidence_refs": {
+          "type": "array",
+          "description": "Pointers to evidence in input documents. Required when status is flagged.",
+          "items": { "$ref": "#/$defs/evidence_ref" }
+        },
+        "recommended_action": {
+          "type": "string",
+          "description": "What /start-build-run should propose to the user when this check is flagged."
+        },
+        "resolution": {
+          "type": "object",
+          "description": "Populated after the user's checkpoint decision. Surfaces in the assumptions register during packaging.",
+          "additionalProperties": false,
+          "properties": {
+            "resolved_at": { "type": "string", "format": "date-time" },
+            "resolution_type": {
+              "type": "string",
+              "enum": ["user_corrected_input", "user_waived", "user_overrode", "acknowledged_no_action"]
+            },
+            "rationale": { "type": "string" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "flagged" } } },
+          "then": {
+            "required": ["detail", "evidence_refs", "recommended_action"]
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "n/a" } } },
+          "then": {
+            "required": ["n_a_reason"]
+          }
+        }
+      ]
+    },
+    "evidence_ref": {
+      "type": "object",
+      "required": ["source_file", "location"],
+      "additionalProperties": false,
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "description": "Path relative to inputs/ — e.g., user_instructions.md, STTM.xlsx, business_rules.md."
+        },
+        "location": {
+          "type": "string",
+          "description": "Section / sheet / cell / row reference — e.g., 'section: Must-Follow Rules', 'sheet: f_sales, row 12', 'line 45'."
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "Optional short quote from the source for traceability."
+        }
+      }
+    }
+  }
+}

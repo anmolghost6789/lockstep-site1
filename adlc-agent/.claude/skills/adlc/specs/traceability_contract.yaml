@@ -1,0 +1,20 @@
+version: 1.0
+purpose: Every item in the lifecycle traces upstream to an approved requirement.
+id_format: "{PREFIX}-{NNN}"
+prefixes:
+  discover-define: [P, US, FR, NFR, RISK, SC]
+  architect-design: [UNIT, AGT, ADR]
+  build-orchestrate: [UNIT, BOLT]
+  evaluate-validate: [EVAL]
+  release-operate: [REL]
+  observe-evolve: [OBS, BL]
+trace_syntax:
+  markdown: "Trace: FR-001, NFR-002"
+  yaml: "trace: [FR-001, NFR-002]"
+  json: '"trace": ["NFR-001"]'
+rules:
+  - Every trace reference must resolve to an ID defined in the same or an upstream artifact.
+  - Every phase after discover-define must contain at least one trace reference.
+  - Evaluation metrics trace to NFR or SC only (thresholds come from the approved AIPRS).
+  - Backlog items trace to an observation and to the requirement they affect.
+check: scripts/validate_artifact.py

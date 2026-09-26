@@ -1,0 +1,142 @@
+version: 4.8
+purpose: Canonical run state contract.
+canonical_file: outputs/00_state/run_state.json
+forbidden_state_files:
+  - run_state.json
+  - run_status.json
+  - outputs/run_state.json
+  - outputs/run_status.json
+timezone:
+  canonical: Asia/Kolkata
+  required_offset: '+05:30'
+  timestamp_format: ISO_8601_with_offset
+status_field: run_status
+compatibility_status_field: status
+status_values:
+  - not_started
+  - in_progress
+  - waiting_for_user
+  - changes_requested
+  - rerun_required
+  - completed
+  - cancelled
+  - error
+stage_status_values:
+  - not_started
+  - in_progress
+  - completed
+  - blocked
+  - rerun_required
+  - skipped
+  - error
+gate_status_values:
+  - not_presented
+  - pending
+  - approved
+  - changes_requested
+  - rejected
+  - skipped
+required_update_points:
+  - run_created_after_empty_input_guard_passes
+  - stage_start
+  - stage_completion
+  - gate_presented_or_auto_approved
+  - gate_response_when_manual
+  - review_output_options_presented
+  - review_response
+  - close_run_reference_decision_presented
+  - close_run_reference_decision_response
+  - pre_gate_force_continue_offered
+  - force_continue_acknowledged
+  - rerun_route
+  - error
+  - cancellation
+  - terminal_input_cleanup
+  - completion
+human_wait_rule: >-
+  Whenever the agent asks a discrete human-decision question, set run_status/status to waiting_for_user and awaiting_user_action to a specific value before invoking AskUserQuestion or presenting the fallback. Exception: when AUTO_APPROVE is enabled for Gate 1 through Gate 5, no gate question is asked, no gate UI is displayed, and run_status/status remain in_progress while the gate is silently approved after pre-gate checks pass.
+required_top_level_fields:
+  - schema_version
+  - created_at
+  - updated_at
+  - timezone
+  - run_status
+  - status
+  - current_stage
+  - current_gate
+  - awaiting_user_action
+  - paths
+  - run_context
+  - user_instructions
+  - context_overrides
+  - metrics
+  - stages
+  - gates
+  - stage_history
+  - gate_history
+  - review_status
+  - input_cleanup
+path_contract:
+  inputs_root: inputs/
+  outputs_root: outputs/
+  active_output_root: outputs/
+  state_root: outputs/00_state/
+  input_snapshot: outputs/00_state/input_snapshot/
+  context_snapshot: outputs/00_state/context_snapshot/guidance/
+  runtime_scratch: outputs/00_state/runtime_scratch/
+  validation_log: outputs/00_state/validation_log.json
+  run_state: outputs/00_state/run_state.json
+approval_files:
+  G1_standard_input: outputs/00_state/standard_input_set/approval_status.json
+  G2_source_selection: outputs/00_state/source_discovery/approval_status.json
+  G3_design: outputs/00_state/design/approval_status.json
+  G4_plan: outputs/00_state/execution_plan/approval_status.json
+  G5_output: outputs/00_state/human_review/approval_status.json
+validation_rules:
+  - id: RS-001
+    severity: critical
+    rule: outputs/00_state/run_state.json must exist only after the empty-input guard passes and before 01 - Start_Run starts.
+  - id: RS-002
+    severity: critical
+    rule: current_stage must match the active stage whenever a stage is executing.
+  - id: RS-003
+    severity: critical
+    rule: When current_gate is non-null and a matching gate status is pending, run_status/status must be waiting_for_user and awaiting_user_action must be gate_decision.
+  - id: RS-004
+    severity: error
+    rule: run_state.json lives only at outputs/00_state/run_state.json; it must never be written at the workspace root or the outputs root.
+  - id: RS-005
+    severity: error
+    rule: status and run_status must match until the compatibility status field is retired.
+  - id: RS-006
+    severity: error
+    rule: Timestamps in run_state.json must include +05:30 offset and must be refreshed at every required update point.
+  - id: RS-007
+    severity: error
+    rule: 07 - Review, 09 - Close_Run, manual gates, and pre-gate FORCE CONTINUE prompts must set waiting_for_user state before asking. AUTO_APPROVE gates are not human questions and must not set waiting_for_user for gate approval.
+  - id: RS-008
+    severity: warning
+    rule: outputs/ is the single working tree; no runs/ workspace, no per-run output folders, and no active-run pointer file may be created.
+
+auto_approve_gate_state_rule:
+  config_path: config/project_config.json#run_settings.auto_approve.enabled
+  applies_to:
+    - Gate1
+    - Gate2
+    - Gate3
+    - Gate4
+    - Gate5
+  when_enabled:
+    - do_not_set_waiting_for_user_for_gate_decision
+    - do_not_call_AskUserQuestion_for_gate_approval
+    - do_not_display_yellow_gate_fallback
+    - write_local_approval_status_json
+    - set_decision_source_AUTO_APPROVE
+    - append_gate_history_event
+    - continue_to_next_stage_after_pre_gate_checks_pass
+  exclusions:
+    - pre_gate_force_continue_decision
+    - review_output_decision
+    - close_run_reference_store_decision
+    - cancel_confirmation
+    - unexpected_output_decision

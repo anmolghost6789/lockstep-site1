@@ -1,0 +1,81 @@
+{
+  "workflowType": "build",
+  "artifactOrder": ["DDL", "DML", "DQ", "PIPELINE", "TESTS"],
+  "generationOrder": ["DDL", "DML", "DQ", "PIPELINE", "TESTS"],
+  "generationPolicy": {
+    "mode": "scope_locked_artifact_families",
+    "description": "Generate only artifact families selected at start. Pipeline depends on DML. Tests can include data tests and pipeline tests depending on selected scope and available artifacts."
+  },
+  "scopeOptions": [
+    { "id": "DDL", "label": "DDL", "scopeKey": "ddl", "description": "CREATE TABLE statements, column definitions, audit columns" },
+    { "id": "DML", "label": "DML", "scopeKey": "dml", "description": "Transformation logic, load scripts, lineage reconciliation" },
+    { "id": "DQ", "label": "DQ", "scopeKey": "dq", "description": "Data quality check scripts" },
+    { "id": "PIPELINE", "label": "Pipeline", "scopeKey": "pipeline", "description": "Databricks, Snowflake, or generic orchestration" },
+    { "id": "TESTS", "label": "Tests", "scopeKey": "tests", "description": "Data tests and pipeline tests" }
+  ],
+  "platformOptions": [
+    { "id": "databricks", "label": "Databricks", "description": "Databricks Workflows YAML" },
+    { "id": "snowflake", "label": "Snowflake", "description": "Snowflake Tasks SQL DAG" },
+    { "id": "generic", "label": "Generic", "description": "Platform-neutral orchestration YAML" }
+  ],
+  "outputs": [
+    {
+      "id": "DDL",
+      "label": "DDL",
+      "name": "DDL Scripts",
+      "command": "/generate-ddl",
+      "phaseId": "ddl",
+      "scopeKey": "ddl",
+      "folder": "generated/ddl",
+      "stems": ["_ddl"]
+    },
+    {
+      "id": "DML",
+      "label": "DML",
+      "name": "DML Scripts",
+      "command": "/generate-dml",
+      "phaseId": "dml",
+      "scopeKey": "dml",
+      "folder": "generated/dml",
+      "stems": ["_dml"]
+    },
+    {
+      "id": "DQ",
+      "label": "DQ",
+      "name": "Data Quality Checks",
+      "command": "/generate-dq",
+      "phaseId": "dq",
+      "scopeKey": "dq",
+      "folder": "generated/dq",
+      "stems": ["_dq"]
+    },
+    {
+      "id": "PIPELINE",
+      "label": "Pipeline",
+      "name": "Pipeline Orchestration",
+      "command": "/generate-pipeline",
+      "phaseId": "pipeline",
+      "scopeKey": "pipeline",
+      "folder": "generated/pipeline",
+      "stems": ["pipeline", "workflow"]
+    },
+    {
+      "id": "TESTS",
+      "label": "Tests",
+      "name": "Data and Pipeline Tests",
+      "command": "/generate-tests",
+      "phaseId": "tests",
+      "scopeKey": "tests",
+      "folders": ["generated/tests_data", "generated/tests_pipeline"],
+      "stems": ["_data_tests", "pipeline_tests"]
+    }
+  ],
+  "commands": {
+    "start": "/start-build-run",
+    "analyze": "/analyze-inputs",
+    "plan": "/plan-build",
+    "evaluate": "/evaluate-build",
+    "revise": "/revise-build",
+    "inspect": "/inspect-build"
+  }
+}

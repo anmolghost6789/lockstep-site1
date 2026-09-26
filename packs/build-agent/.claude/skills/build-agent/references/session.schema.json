@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://build-agent.local/schemas/session.schema.json",
+  "title": "Build Agent session.json",
+  "description": "Run-level ledger written and updated after every significant step of a Build Agent run. Lives at state/run_id_<ID>/session.json. Authoritative for run recovery and inspect-build reconciliation.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "created_at",
+    "updated_at",
+    "status",
+    "active_phase",
+    "checkpoint_history"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "description": "Version of this schema the session.json conforms to. Current: 3.0.0. Major bump = breaking change; minor = additive; patch = docs. 3.0.0 adds pipeline, lineage, and split test tracking.",
+      "type": "string",
+      "const": "3.0.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque identifier for this run. Matches the directory name state/run_id_<ID>/."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of run creation."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the most recent session.json write."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "initialized",
+        "in_progress",
+        "checkpoint_pending",
+        "blocked",
+        "evaluated",
+        "revising",
+        "packaged",
+        "abandoned"
+      ],
+      "description": "Coarse run status. checkpoint_pending = user input required; blocked = unrecoverable without user intervention."
+    },
+    "active_phase": {
+      "type": "string",
+      "enum": [
+        "start-build-run",
+        "analyze-inputs",
+        "plan-build",
+        "generate-build",
+        "generate-ddl",
+        "generate-dml",
+        "generate-dq",
+        "generate-pipeline",
+        "generate-tests",
+        "evaluate-build",
+        "revise-build",
+        "package-build",
+        "inspect-build",
+        "none"
+      ]
+    },
+    "scope_selection": {
+      "type": "object",
+      "description": "Artifact types selected by the user at /start-build-run Step 0. Locked for the life of the run.",
+      "properties": {
+        "ddl":               { "type": "boolean" },
+        "dml":               { "type": "boolean" },
+        "dq":                { "type": "boolean" },
+        "pipeline":          { "type": "boolean", "description": "If true, /generate-pipeline runs after DML+DQ." },
+        "tests":             { "type": "boolean" },
+        "pipeline_platform": {
+          "type": ["string", "null"],
+          "enum": ["databricks", "snowflake", "generic", null],
+          "description": "Set by /generate-pipeline Step 1. Null until platform is selected."
+        },
+        "locked_at":  { "type": "string", "format": "date-time" },
+        "user_input": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "checkpoint_history": {
+      "type": "array",
+      "description": "Ordered list of every user-facing checkpoint decision.",
+      "items": {
+        "type": "object",
+        "required": ["checkpoint_name", "phase", "requested_at", "decision"],
+        "additionalProperties": true,
+        "properties": {
+          "checkpoint_name": { "type": "string" },
+          "phase": { "type": "string" },
+          "requested_at": { "type": "string", "format": "date-time" },
+          "decided_at": { "type": "string", "format": "date-time" },
+          "decision": { "type": "string" },
+          "decision_notes": { "type": "string" },
+          "scope_locked": { "type": "string" }
+        }
+      }
+    },
+    "input_summary": {
+      "type": "object",
+      "description": "Populated by /start-build-run. Quality gate results and input inventory.",
+      "additionalProperties": true
+    },
+    "analysis_summary": {
+      "type": "object",
+      "description": "Populated by /analyze-inputs. Canonical model counts, convention sources, low-confidence tables.",
+      "additionalProperties": true
+    },
+    "planning_summary": {
+      "type": "object",
+      "description": "Populated by /plan-build. Wave count, skip_dml counts, output preferences, lineage status.",
+      "properties": {
+        "lineage_generated":  { "type": "boolean", "description": "True when lineage.json has been written by /plan-build Step 7." },
+        "lineage_reconciled": { "type": "boolean", "description": "True when /generate-dml Step 5 reconciliation has run (or revise-build has patched lineage)." }
+      },
+      "additionalProperties": true
+    },
+    "generation_summary": {
+      "type": "object",
+      "description": "Populated by individual /generate-* commands (/generate-ddl, /generate-dml, /generate-dq, /generate-pipeline, /generate-tests).",
+      "properties": {
+        "ddl_complete":             { "type": "boolean" },
+        "dml_complete":             { "type": "boolean" },
+        "dq_complete":              { "type": "boolean" },
+        "pipeline_complete":        { "type": "boolean", "description": "True when /generate-pipeline Step 6 completes." },
+        "tests_data_complete":      { "type": "boolean", "description": "True when data tests category is complete." },
+        "tests_pipeline_complete":  { "type": "boolean", "description": "True when pipeline tests category is complete." },
+        "tests_complete":           { "type": "boolean", "description": "Deprecated alias for tests_data_complete. Kept for backward compatibility." }
+      },
+      "additionalProperties": true
+    },
+    "evaluation_summary": {
+      "type": "object",
+      "description": "Populated by /evaluate-build. Overall score, verdict, blocker count.",
+      "additionalProperties": true
+    },
+    "revision_summary": {
+      "type": "object",
+      "description": "Populated by /revise-build. Cycle count, remediation status.",
+      "additionalProperties": true
+    },
+    "packaging_summary": {
+      "type": "object",
+      "description": "Legacy field from removed /package-build phase. Optional; not populated in current runs.",
+      "additionalProperties": true
+    },
+    "completed_tables": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tables_remaining": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "active_wave": {
+      "type": ["integer", "string", "null"]
+    },
+    "artifact_inventory": {
+      "type": "object",
+      "description": "Per-table per-family record of generated artifacts. Entries mark scope-excluded artifacts distinctly from incomplete ones.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "ddl":            { "type": "string", "enum": ["generated", "validated", "incomplete", "scope-excluded", "pending"] },
+          "dml":            { "type": "string", "enum": ["generated", "validated", "incomplete", "scope-excluded", "pending", "skip_dml"] },
+          "dq":             { "type": "string", "enum": ["generated", "validated", "incomplete", "scope-excluded", "pending"] },
+          "pipeline":       { "type": "string", "enum": ["generated", "validated", "incomplete", "scope-excluded", "pending"] },
+          "tests_data":     { "type": "string", "enum": ["generated", "validated", "incomplete", "scope-excluded", "pending"] },
+          "tests_pipeline": { "type": "string", "enum": ["generated", "validated", "incomplete", "scope-excluded", "pending", "skipped-no-pipeline"] },
+          "tests":          { "type": "string", "enum": ["generated", "validated", "incomplete", "scope-excluded", "pending"], "description": "Deprecated alias for tests_data." }
+        },
+        "additionalProperties": true
+      }
+    },
+    "remediation_status": {
+      "type": "object",
+      "properties": {
+        "blocker_open": { "type": "integer", "minimum": 0 },
+        "must_fix_open": { "type": "integer", "minimum": 0 },
+        "should_fix_open": { "type": "integer", "minimum": 0 },
+        "cycles_completed": { "type": "integer", "minimum": 0, "maximum": 10 }
+      },
+      "additionalProperties": true
+    }
+  }
+}

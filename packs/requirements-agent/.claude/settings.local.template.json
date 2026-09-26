@@ -1,0 +1,8 @@
+{
+  "env": {
+    "GITHUB_PAT": "replace-with-a-fine-grained-token-if-using-github-mcp",
+    "JIRA_PROJECT_KEY": "replace-with-target-jira-project-key",
+    "JIRA_EMAIL": "replace-with-atlassian-account-email",
+    "JIRA_API_TOKEN": "replace-with-atlassian-api-token"
+  }
+}

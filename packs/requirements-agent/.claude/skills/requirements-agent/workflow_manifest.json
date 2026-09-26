@@ -1,0 +1,113 @@
+{
+  "_design_note": "Workflow metadata for output selection, command routing, generation order, template candidates, and public artifact paths. Template shape remains dynamic and is read from the selected template at generation time.",
+  "templates": {
+    "preserveAllSections": true,
+    "missingInformationInline": true,
+    "finalOpenItemsRequired": true
+  },
+  "generationOrder": [
+    "BRD",
+    "FRD",
+    "URS",
+    "JIRA"
+  ],
+  "outputOrder": [
+    "BRD",
+    "FRD",
+    "URS",
+    "JIRA"
+  ],
+  "generationPolicy": {
+    "mode": "soft_dependency_order",
+    "description": "Use this order among the user's selected outputs. Do not force unselected upstream outputs as hard dependencies. Extraction creates evidence-proportional knowledge for each selected template, including embedded use cases, business questions, metrics, rules, and data requirements where applicable."
+  },
+  "outputs": [
+    {
+      "id": "BRD",
+      "label": "BRD",
+      "name": "Business Requirements Document (consolidated — embeds UC scenarios, KBQs, KPIs / Metrics, Business Rules)",
+      "template": ".claude/skills/requirements-agent/assets/templates/deliverables/BRD.template.md",
+      "openItemsSection": "11. Open Items",
+      "command": "/generate-brd",
+      "outputPath": "outputs/02_deliverables/BRD.md",
+      "phaseId": "brd",
+      "stems": [
+        "brd",
+        "business_requirements_document"
+      ],
+      "preferredAfter": []
+    },
+    {
+      "id": "FRD",
+      "label": "FRD",
+      "name": "Functional Requirements Document (consolidated — embeds Data Requirements)",
+      "template": ".claude/skills/requirements-agent/assets/templates/deliverables/FRD.template.md",
+      "openItemsSection": "11. Open Items",
+      "command": "/generate-frd",
+      "outputPath": "outputs/02_deliverables/FRD.md",
+      "phaseId": "frd",
+      "stems": [
+        "frd",
+        "functional_requirements_document"
+      ],
+      "preferredAfter": [
+        "BRD"
+      ]
+    },
+    {
+      "id": "URS",
+      "label": "URS",
+      "name": "User Requirements Specification",
+      "template": ".claude/skills/requirements-agent/assets/templates/deliverables/URS.template.md",
+      "openItemsSection": "18. Open Items",
+      "command": "/generate-urs",
+      "outputPath": "outputs/02_deliverables/URS.md",
+      "phaseId": "urs",
+      "stems": [
+        "urs",
+        "user_requirements",
+        "user_requirements_specification",
+        "user_requirements_document"
+      ],
+      "preferredAfter": [
+        "BRD"
+      ]
+    },
+    {
+      "id": "JIRA",
+      "label": "JIRA",
+      "name": "Jira Story Pack",
+      "template": ".claude/skills/requirements-agent/assets/templates/deliverables/JIRA_STORY_PACK.template.md",
+      "openItemsSection": "8. Open Items",
+      "command": "/generate-jira-stories",
+      "outputPath": "outputs/02_deliverables/JIRA.md",
+      "phaseId": "jira",
+      "stems": [
+        "jira",
+        "jira_stories",
+        "stories",
+        "story_pack",
+        "jira_story_pack"
+      ],
+      "preferredAfter": [
+        "BRD",
+        "FRD",
+        "URS"
+      ]
+    }
+  ],
+  "commands": {
+    "start": "/start-run",
+    "extract": "/extract-requirements",
+    "generateBrd": "/generate-brd",
+    "generateFrd": "/generate-frd",
+    "generateUrs": "/generate-urs",
+    "generateJiraStories": "/generate-jira-stories",
+    "generateDeliverables": "/generate-deliverables",
+    "evaluate": "/evaluate-run",
+    "revise": "/revise-run",
+    "publishToJira": "/publish-to-jira",
+    "status": "/status",
+    "inspectRun": "/inspect-run"
+  }
+}

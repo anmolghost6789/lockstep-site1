@@ -1,0 +1,34 @@
+version: 1.0
+purpose: Human approval gates between ADLC phases.
+modes:
+  github:   # default
+    request: scripts/gate_github.py request --gate {gate} --intent {intent}
+    check: scripts/gate_github.py check --gate {gate}
+    record: pull request with label adlc-gate-{gate}, reviewed by the CODEOWNERS team, merged to the default branch
+    setup: scripts/setup_codeowners.py plus branch protection (require code owner review, dismiss stale approvals, no bypass)
+  local:
+    writer: .claude/skills/adlc/scripts/adlc_gate.py   # sole writer of adlc/.gates/
+    gate_file: adlc/.gates/{gate}.json
+gates:
+  G1: {phase: discover-define,   artifact: adlc/01-aiprs.md,       approver_roles: [product_owner]}
+  G2: {phase: architect-design,  artifact: adlc/02-blueprint.md,   approver_roles: [architect]}
+  G3: {phase: build-orchestrate, artifact: adlc/03-units.yaml,     approver_roles: [engineer], also: per-unit diff review recorded in 03-units.yaml}
+  G4: {phase: evaluate-validate, artifact: adlc/04-scorecard.json, approver_roles: [qa_lead]}
+  G5: {phase: release-operate,   artifact: adlc/05-release.md,     approver_roles: [release_manager], risk_high_adds: [security_officer], risk_critical_adds: [security_officer, waiver_approver]}
+  G6: {phase: observe-evolve,    artifact: adlc/06-backlog.md,     approver_roles: [product_owner]}
+status_values: [pending, approved, rejected, waived]
+invariants:
+  - An approval binds to the artifact sha256 recorded at request time.
+  - Any change to the artifact after approval invalidates the gate (check exits 4).
+  - The requester cannot decide the gate (separation_of_duties).
+  - Every required role must approve; min_approvals applies per role.
+  - Rejections require a comment; the phase re-enters and re-requests.
+  - Waivers require waiver_approver, a reason, and expire (max 30 days).
+  - Every request, decision, denial and waiver is written to the audit log.
+identity:
+  primary: ADLC_IDENTITY (set by the VS Code extension from the SSO token)
+  roles: ADLC_GROUPS mapped through config/governance/gate_roles.json > group_role_map
+  fallback: git user.email with static_members (for pilots only)
+deployment_pipeline_contract: >-
+  The production deploy job must run the G5 check for the active gate mode (`gate_github.py check --gate G5`
+  or `adlc_gate.py check --gate G5`) and fail closed on any non-zero exit.

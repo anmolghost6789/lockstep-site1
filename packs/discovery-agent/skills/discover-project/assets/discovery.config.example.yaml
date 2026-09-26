@@ -1,0 +1,69 @@
+version: "1"
+project_id: replace-me
+objective: Replace with the decision or outcome this discovery must enable.
+readiness_target: requirements-ready
+knowledge_root: knowledge
+
+engagement:
+  # Use multiple when needed, for example migration-modernization + source-onboarding.
+  archetypes:
+    - general
+  # Adds facets for a custom project shape without changing the plugin.
+  required_facets: []
+
+inputs:
+  roots: []
+  evidence_mode: snapshot
+  max_files: 500
+  max_file_bytes: 104857600
+  max_extracted_chars: 2000000
+  max_tabular_rows: 2000
+
+discovery:
+  seeds: []
+  include:
+    systems: []
+    catalogs: []
+    schemas: []
+    assets: []
+  exclude:
+    systems: []
+    catalogs: []
+    schemas: []
+    assets: []
+  limits:
+    max_candidate_assets: 100
+    max_deep_profiles: 15
+    lineage_depth: 1
+    allow_row_sampling: false
+  stop_when:
+    - requested_readiness_supported
+    - material_contradictions_visible
+    - remaining_gaps_owned_or_non_blocking
+
+research:
+  # off | official-only | official-first | open-with-review
+  mode: official-first
+  # Leave empty for official-first. Set an explicit allowlist for official-only.
+  allowed_domains: []
+  denied_domains: []
+  max_searches_per_run: 20
+  max_pages_per_question: 5
+  default_stale_after_days: 30
+  allow_sensitive_query_terms: false
+
+databricks:
+  provider: auto
+  profile: DEFAULT
+  workspace_hint: null
+  agent_resource_prefix: de_discovery_
+  policy:
+    read: allow
+    create_owned: allow
+    modify_existing: ask
+    manage_permissions: ask
+    delete: deny
+
+ownership:
+  discovery_owner: null
+  boundary_approver: null

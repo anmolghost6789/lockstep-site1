@@ -1,0 +1,580 @@
+{
+  "project_name": "Data Artifact Generation Agent",
+  "version": "4.8-phase-split",
+  "description": "Claude Code design agent package with split phase skills and thresholded subagents for input analysis, artifact writing, and evaluation.",
+  "defaults": {
+    "database_name_pattern": "{client}_db_{env}",
+    "schema_name_patterns": {
+      "L0": "{client}_{rw_prefix}",
+      "L1": "{client}_{wk_prefix}",
+      "L2": "{client}_{dw_prefix}",
+      "L3+": "{client}_{dm_prefix}"
+    },
+    "environment_placeholder": "{env}",
+    "naming_convention": "UPPER_SNAKE_CASE",
+    "layer_prefixes": {
+      "L0_schema": "rw",
+      "L0_table": "rw_",
+      "L1_schema": "wk",
+      "L1_table": "",
+      "L2_schema": "dw",
+      "L2_table_dimension": "d_",
+      "L2_table_fact": "f_",
+      "L2_table_reference": "ref_",
+      "L2_table_crossref": "xref_"
+    },
+    "audit_columns": [
+      {
+        "name": "INRT_DT",
+        "data_type": "TIMESTAMP",
+        "role": "audit",
+        "nullable": "N",
+        "logical_name": "Insert Date",
+        "description": "Audit",
+        "transformation_logic": "System generated column"
+      },
+      {
+        "name": "INRT_BY",
+        "data_type": "VARCHAR",
+        "role": "audit",
+        "nullable": "N",
+        "logical_name": "Insert By",
+        "description": "Audit",
+        "transformation_logic": "System generated column"
+      },
+      {
+        "name": "CYCL_TIME_ID",
+        "data_type": "VARCHAR",
+        "role": "audit",
+        "nullable": "N",
+        "logical_name": "Cycle Time ID",
+        "description": "Audit",
+        "transformation_logic": "System generated column"
+      },
+      {
+        "name": "UPDT_DT",
+        "data_type": "TIMESTAMP",
+        "role": "audit",
+        "nullable": "N",
+        "logical_name": "Update Date",
+        "description": "Audit",
+        "transformation_logic": "System generated column"
+      },
+      {
+        "name": "UPDT_BY",
+        "data_type": "VARCHAR",
+        "role": "audit",
+        "nullable": "N",
+        "logical_name": "Update By",
+        "description": "Audit",
+        "transformation_logic": "System generated column"
+      }
+    ],
+    "surrogate_key": {
+      "data_type": "VARCHAR",
+      "nullable": "N",
+      "role": "surrogate_key",
+      "is_primary_key": "Y",
+      "transformation_logic": "Auto Generated column. New record: increment target value by 1 for each new record. If table is empty, start with 1.",
+      "naming_pattern": "{TABLE_SHORT}_SK"
+    },
+    "standard_dq_checks": {
+      "business_key_not_null": {
+        "dq_check": "Not NULL",
+        "criticality": "C",
+        "threshold_value": 10
+      },
+      "surrogate_key_uniqueness": {
+        "dq_check": "Uniqueness",
+        "criticality": "C",
+        "threshold_value": 0
+      },
+      "audit_not_null": {
+        "dq_check": "Not Null",
+        "criticality": "NC",
+        "threshold_value": 5
+      },
+      "date_format": {
+        "dq_check": "Date Format Check",
+        "criticality": "NC",
+        "threshold_value": 10
+      },
+      "year_month_check": {
+        "dq_check": "Year month check",
+        "criticality": "C",
+        "threshold_value": 10
+      }
+    }
+  },
+  "reference_store": {
+    "use_reference_store": true,
+    "raw_path": "context/reference/raw",
+    "processed_path": "context/reference/processed",
+    "governance_enabled": true,
+    "governance_defaults": {
+      "reuse_scope": "client",
+      "approved_for_reuse": false,
+      "approval_status": "provisional",
+      "sensitivity": "client_specific",
+      "human_approved_in_source_run": true,
+      "approved_for_cross_client_reuse": false,
+      "known_limitations": [],
+      "do_not_apply_when": []
+    },
+    "built_in_pattern_defaults": {
+      "reuse_scope": "global",
+      "approved_for_reuse": true,
+      "approval_status": "approved",
+      "sensitivity": "internal_standard",
+      "approved_for_cross_client_reuse": true
+    },
+    "folder_name": "context/reference"
+  },
+  "run_settings": {
+    "max_layers": 15,
+    "confidence_threshold": 80,
+    "max_questions_per_interaction": 999,
+    "critical_confidence_threshold": 80,
+    "critical_confidence_elements": [
+      "table_grain",
+      "primary_key",
+      "required_source_table",
+      "required_source_column",
+      "kpi_formula",
+      "join_path",
+      "business_rule",
+      "target_entity_definition",
+      "mandatory_output_column",
+      "dq_rule_basis"
+    ],
+    "question_phase": "after_input_set_evaluation_report",
+    "start_run_no_immediate_questions": true,
+    "input_set_evaluation_report_path": "outputs/01_inputs/input_set_evaluation_report.md",
+    "midrun_uploads_folder": "inputs/midrun_uploads",
+    "empty_input_behavior": {
+      "ignore_files": [
+        "README.md",
+        ".gitkeep",
+        ".keep",
+        ".DS_Store"
+      ],
+      "ignore_folders_for_initial_start": [
+        "midrun_uploads"
+      ],
+      "block_start_run_when_no_meaningful_input": true,
+      "no_input_message": "Sorry! I can't start the run without any input..",
+      "help_file": "inputs/README.md"
+    },
+    "timezone": "Asia/Kolkata",
+    "timestamp_offset": "+05:30",
+    "timestamp_format": "ISO_8601_with_offset",
+    "terminal_input_cleanup": "clear_user_files_from_inputs_preserve_readme",
+    "critical_issue_blocks_progression": true
+  },
+  "context_hierarchy": {
+    "tiers": [
+      "enterprise_context",
+      "domain_context",
+      "project_context",
+      "user_instructions"
+    ],
+    "folders": {
+      "enterprise_context": "context/guidance/enterprise_context",
+      "domain_context": "context/guidance/domain_context",
+      "project_context": "context/guidance/project_context",
+      "user_instructions": "inputs/instructions"
+    },
+    "broadest_to_narrowest": true,
+    "override_direction": "lower_tier_overrides_higher",
+    "override_requires_explicit_confirmation": true,
+    "severity_by_tiers_skipped": {
+      "0": "normal",
+      "1": "elevated",
+      "2": "high"
+    },
+    "domain_definition_note": "Domain refers to a business sub-area within the enterprise (e.g., Commercial Sales, Manufacturing, Retail Banking) per Data Mesh / DDD principles. It is not the industry the enterprise operates in.",
+    "directive_status_values": [
+      "pending",
+      "applied",
+      "deferred_with_confirmation",
+      "rejected_with_confirmation"
+    ],
+    "unaddressed_directive_is_critical_failure": true,
+    "classification_source": "tiered_guidance_folders_plus_run_instruction_folder",
+    "canonical_folder": "context/guidance",
+    "guidance_root": "context/guidance",
+    "instructions_root": "inputs/instructions",
+    "reference_root": "context/reference"
+  },
+  "user_instructions": {
+    "folder": "inputs/instructions",
+    "extensions": "inherit_from_supported_input_formats",
+    "format": "non_structured_free_form",
+    "aggregate_multiple_files": true,
+    "midrun_uploads_allowed": true,
+    "default_priority": "high",
+    "filename_stem_pattern": "user_instructions",
+    "run_specific": true,
+    "cleared_on_terminal_cleanup": true,
+    "applies_at_phases": [
+      "start_design_run",
+      "discover_sources",
+      "design_architecture",
+      "plan_execution",
+      "generate_artifacts",
+      "evaluate_design",
+      "close_design_run"
+    ]
+  },
+  "template_paths": {
+    "sttm": ".claude/skills/design-agent/templates/workbooks/STTM_TEMPLATE.xlsx",
+    "data_model": ".claude/skills/design-agent/templates/workbooks/DATA_MODEL_TEMPLATE.xlsx",
+    "dq": ".claude/skills/design-agent/templates/workbooks/DQ_TEMPLATE.xlsx",
+    "er_diagram": ".claude/skills/design-agent/templates/workbooks/ER_DIAGRAM_TEMPLATE.xlsx"
+  },
+  "supported_input_formats": [
+    "docx",
+    "txt",
+    "xlsx",
+    "xls",
+    "zip",
+    "pptx",
+    "ppt",
+    "pdf",
+    "csv",
+    "tsv",
+    "md",
+    "py",
+    "json",
+    "xml",
+    "yaml",
+    "yml"
+  ],
+  "source_discovery": {
+    "run_folder": "outputs/00_state/source_discovery",
+    "required_outputs": [
+      "required_source_concepts.json",
+      "candidate_source_matches.json",
+      "selected_sources.json",
+      "rejected_sources.json",
+      "source_selection_decisions.json",
+      "source_gap_report.md",
+      "source_discovery_evidence_map.json",
+      "approval_status.json"
+    ],
+    "conditional_outputs": [
+      {
+        "name": "reference_store_source_audit.json",
+        "path": "outputs/00_state/source_discovery/reference_store_source_audit.json",
+        "condition": "reference_store.use_reference_store=true (paths under context/reference)"
+      },
+      {
+        "name": "source_catalog_delta.json",
+        "path": "outputs/00_state/source_discovery/source_catalog_delta.json",
+        "condition": "only if new metadata discovered"
+      }
+    ],
+    "standard_input_source_inventory_scope": "full_verified_source_universe",
+    "design_source_usage_rule": "selected_or_human_approved_only"
+  },
+  "evaluation": {
+    "semantic_judge_enabled": true,
+    "default_formatting_strictness": "content_strict_format_reasonable",
+    "fail_on_unapproved_best_guess": true,
+    "validation_log_path": "outputs/00_state/validation_log.json",
+    "deterministic_validation_is_blocking": true,
+    "single_pass_evaluation": true,
+    "outputs": [
+      "evaluation_report.md",
+      "evaluation_scores.json"
+    ]
+  },
+  "input_structure": {
+    "root": "inputs",
+    "no_run_folders_inside_input": true,
+    "readme_filename": "README.md",
+    "snapshot_to_runs": true,
+    "snapshot_path": "outputs/00_state/input_snapshot",
+    "midrun_uploads_path": "inputs/midrun_uploads",
+    "categories": [
+      {
+        "name": "instructions",
+        "output_component": "user_instructions.json",
+        "required": false,
+        "classification_note": "Run-specific user directives only. Recommended filename stem: user_instructions. Parsed as the narrowest context tier."
+      },
+      {
+        "name": "requirements",
+        "output_component": "data_requirements.json",
+        "required": false,
+        "classification_note": "BRDs, scope, entities, acceptance criteria, and requirements evidence."
+      },
+      {
+        "name": "source_inventory",
+        "output_component": "source_inventory.json",
+        "required": false
+      },
+      {
+        "name": "additional_documents",
+        "output_component": "additional_documents.json",
+        "required": false,
+        "classification_note": "Business rules, KPIs, KBQs, data products, layering notes, DQ expectations, examples, comparison artifacts, and any other current-run additional documents. Classify content into the best-fit parsed component and index document purpose, usefulness, and authority inside additional_documents.json."
+      }
+    ],
+    "midrun_uploads_runtime_created": true,
+    "terminal_cleanup": {
+      "enabled": true,
+      "when": [
+        "completed",
+        "cancelled",
+        "error"
+      ],
+      "clear_user_files_under_inputs": true,
+      "preserve_readme_files": true,
+      "remove_midrun_uploads_folder": true,
+      "write_report": "outputs/00_state/logs/input_cleanup_report.json"
+    },
+    "context_root": "context",
+    "guidance_root": "context/guidance",
+    "reference_root": "context/reference",
+    "context_snapshot_path": "outputs/00_state/context_snapshot"
+  },
+  "output_strategy": {
+    "root": "outputs",
+    "archive_existing_output_before_new_run": false,
+    "layer_output_path": "outputs/05_artifacts/{layer}",
+    "er_diagram_path": "outputs/05_artifacts/ER_DIAGRAM.xlsx",
+    "risk_manifest_path": "outputs/RISK_MANIFEST.json",
+    "archive_policy": "disabled; do not create archive/ folders; each run writes only to the single outputs/ working tree",
+    "active_output_root": "outputs",
+    "stale_output_safety": {
+      "scope": "outputs/",
+      "declared_file_source": "outputs/04_plan/file_plan.json",
+      "unexpected_files_policy": "stop_and_ask_before_removing_or_overwriting"
+    }
+  },
+  "runtime_code_policy": {
+    "instruction_driven_package": true,
+    "prewritten_runtime_scripts_allowed": false,
+    "generated_code_allowed": true,
+    "generated_code_scope": "outputs/00_state/runtime_scratch only",
+    "persist_generated_py_files_after_completion": false,
+    "cleanup_stage": "09 - Close_Run",
+    "blocked_persistent_locations": [
+      ".claude/skills/design-agent",
+      ".claude/skills/design-agent/templates/specs",
+      ".claude/skills/design-agent/templates/workbooks",
+      "config",
+      "context/reference",
+      "memory",
+      ".claude",
+      "project_root",
+      "inputs",
+      "outputs_root_except_00_state_runtime_scratch"
+    ]
+  },
+  "orchestration": {
+    "enabled": true,
+    "orchestrator": "main_conversation_only",
+    "handoff_root": "outputs/00_state/handoffs (artifact-writer fan-out only)",
+    "context_packets_root": "outputs/00_state/context_packets",
+    "state_file": "outputs/00_state/run_state.json",
+    "subagents": [
+      {
+        "name": "input-analyzer",
+        "primary_phases": [
+          "start_design_run"
+        ],
+        "mode": "run_artifact_writing",
+        "spawn_when": "input_files > 5 or any_input_file_mb > 10 or source_tables > 20",
+        "purpose": "input snapshot classification and Standard Input Set writing"
+      },
+      {
+        "name": "artifact-writer",
+        "primary_phases": [
+          "generate_artifacts"
+        ],
+        "mode": "run_artifact_writing",
+        "spawn_when": "tables_to_generate > 5; fan out by layer when layers >= 2; split layers into dependency-safe sub-waves when tables_in_layer > 15",
+        "purpose": "layer-scoped workbook generation from approved design and plan"
+      },
+      {
+        "name": "design-evaluator",
+        "primary_phases": [
+          "evaluate_design"
+        ],
+        "mode": "run_artifact_review",
+        "spawn_when": "always for /evaluate-design",
+        "purpose": "single-pass deterministic and semantic evaluation"
+      }
+    ],
+    "subagents_do_not_talk_to_each_other": true,
+    "human_communication_owner": "orchestrator_only",
+    "delegate_when": {
+      "input_files_gt": 5,
+      "any_input_file_mb_gt": 10,
+      "source_tables_gt": 20,
+      "tables_to_generate_gt": 5,
+      "evaluate_design": "always_delegate_to_design_evaluator"
+    },
+    "orchestrator_is_subagent": false,
+    "orchestrator_role_file": ".claude/skills/design-agent/utilities/orchestrator-role.md",
+    "reference_store_ownership": {
+      "discover_sources": "orchestrator may consult governed processed reference patterns for source-candidate hints; current-run evidence wins.",
+      "design_architecture": "orchestrator may consult governed processed reference patterns for architecture, mapping, and DQ precedents; current-run evidence wins.",
+      "close_design_run": "orchestrator asks the human before adding current-run material into context/reference."
+    },
+    "user_visible_delegation_updates_required": true,
+    "delegation_narration": {
+      "announce_spawn": true,
+      "announce_completion": true,
+      "announce_no_delegation_decision": true
+    },
+    "run_scoped_intermediates": true
+  },
+  "machine_readable_specs": {
+    "root": ".claude/skills/design-agent/specs",
+    "artifact_contract": ".claude/skills/design-agent/specs/artifact_contract.yaml",
+    "template_contracts": ".claude/skills/design-agent/specs/template_contracts.yaml",
+    "validation_contracts": ".claude/skills/design-agent/specs/validation_contracts.yaml",
+    "traceability_contract": ".claude/skills/design-agent/specs/traceability_contract.yaml",
+    "run_state_contract": ".claude/skills/design-agent/specs/run_state_contract.yaml",
+    "files": [
+      "artifact_contract.yaml",
+      "template_contracts.yaml",
+      "validation_contracts.yaml",
+      "traceability_contract.yaml",
+      "run_state_contract.yaml"
+    ]
+  },
+  "traceability": {
+    "row_level_references_required": true,
+    "evidence_registry_path": "outputs/00_state/traceability/evidence_registry.json",
+    "reference_delimiter": "; ",
+    "blank_references_are_failure_for_data_rows": true,
+    "allowed_reference_prefixes": [
+      "INPUT",
+      "SRC",
+      "BRD",
+      "RULE",
+      "KPI",
+      "KBQ",
+      "PRODUCT",
+      "DQREQ",
+      "CTX",
+      "SUPPORT",
+      "HUMAN",
+      "CONFIG",
+      "REFSTORE",
+      "PKG",
+      "INFERRED",
+      "RISK"
+    ]
+  },
+  "agent_memory": {
+    "memory_root": "memory",
+    "memory_files": [
+      "README.md",
+      "MEMORY.md",
+      "CONVENTIONS.md",
+      "DECISIONS.md",
+      "PATTERN_LIBRARY.md"
+    ],
+    "purpose": "Package operational durable memory in the top-level memory/ markdown files, not business-domain/reference-store memory.",
+    "do_not_store": [
+      "client confidential data",
+      "PII/PHI",
+      "raw source data",
+      "generated artifact contents",
+      "client-specific business rules unless approved for context/reference"
+    ]
+  },
+  "package_layout": {
+    "claude_code_convention": true,
+    "workflow_rulebook_root": ".claude/skills/design-agent",
+    "former_rulebook_root_removed": true,
+    "placement_rationale": "The stage, gate, utility, knowledge, template-spec, and YAML contract files are supporting files for the hidden design-agent skill, so they live inside that skill directory and load on demand with the workflow rather than as always-on rules.",
+    "input_root": "inputs",
+    "output_root": "outputs",
+    "runs_root": null,
+    "archive_root": null,
+    "no_archive_folder": true,
+    "intermediate_state_policy": "outputs/00_state/ stores run-scoped intermediate state; outputs/ is the single working tree with no per-run folders.",
+    "output_policy": "outputs/ holds numbered deliverable folders (01_inputs .. 06_evaluation) plus outputs/00_state/ for agent-internal state.",
+    "config_root": "config",
+    "memory_root": "memory",
+    "reference_store_root": "context/reference",
+    "no_root_config_folder": false,
+    "no_root_memory_folder": false,
+    "no_root_reference_store_folder": true,
+    "claude_hooks_root": ".claude/hooks",
+    "claude_rules_root": ".claude/rules",
+    "mcp_project_config": ".mcp.json",
+    "version": "4.7",
+    "context_root": "context",
+    "guidance_root": "context/guidance",
+    "reference_root": "context/reference",
+    "template_root": ".claude/skills/design-agent/templates",
+    "template_specs_root": ".claude/skills/design-agent/templates/specs",
+    "template_workbooks_root": ".claude/skills/design-agent/templates/workbooks",
+    "no_root_templates_folder": true,
+    "no_root_context_inside_inputs": true,
+    "instructions_root": "inputs/instructions"
+  },
+  "run_state_policy": {
+    "canonical_file": "outputs/00_state/run_state.json",
+    "update_required_at": "run_created_after_empty_input_guard_passes, phase_start, phase_completion, close_run_reference_decision_presented, close_run_reference_decision_response, rerun_route, error, cancel, terminal_input_cleanup, final_completion",
+    "status_values": [
+      "not_started",
+      "in_progress",
+      "waiting_for_user",
+      "changes_requested",
+      "rerun_required",
+      "completed",
+      "cancelled",
+      "error"
+    ],
+    "stage_status_values": [
+      "not_started",
+      "in_progress",
+      "completed",
+      "blocked",
+      "rerun_required",
+      "skipped",
+      "error"
+    ],
+    "utility_file": ".claude/skills/design-agent/utilities/run-state-management.md",
+    "spec_file": ".claude/skills/design-agent/specs/run_state_contract.yaml",
+    "timezone": "Asia/Kolkata",
+    "timestamp_offset": "+05:30",
+    "timestamp_format": "ISO_8601_with_offset"
+  },
+  "ui_presentation": {
+    "review_output_options_format": "AskUserQuestion_primary_yellow_typed_fallback",
+    "files_as_links_not_chat_dumps": true,
+    "report_content_displayed_in_chat": false,
+    "artifact_content_displayed_in_chat": false,
+    "primary_decision_ui": "AskUserQuestion",
+    "close_run_reference_options_format": "AskUserQuestion_primary_yellow_typed_fallback",
+    "fallback_theme": "yellow",
+    "accept_typed_fallback_if_structured_ui_not_supported": true
+  },
+  "human_decision_points": {
+    "primary_tool": "AskUserQuestion",
+    "fallback": "yellow_explicit_typed_options_outside_code_fences",
+    "required_points": [
+      "close_design_run reference-store inclusion"
+    ],
+    "set_waiting_for_user_before_asking": true
+  },
+  "stage_map": {
+    "start_design_run": "Start Design Run",
+    "discover_sources": "Discover Sources",
+    "design_architecture": "Design Architecture",
+    "plan_execution": "Plan Execution",
+    "generate_artifacts": "Generate Artifacts",
+    "evaluate_design": "Evaluate Design",
+    "close_design_run": "Close Design Run"
+  },
+  "machine_readable_contracts": {}
+}

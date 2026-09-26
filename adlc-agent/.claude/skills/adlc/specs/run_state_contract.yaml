@@ -1,0 +1,10 @@
+version: 1.0
+canonical_file: adlc/.state/run_state.json
+projection: progress.json            # read by the VS Code extension; derived, never edited
+writer: scripts/state.py
+timezone: Asia/Kolkata (+05:30), ISO-8601
+run_status_values: [not_started, in_progress, waiting_for_user, cancelled, error, completed]
+phase_status_values: [pending, running, done]
+awaiting_user_action_values: [clarification, gate_approval, cancel_confirmation, blocker_resolution]
+write_points: [phase start, phase completion, human wait, cancellation]
+max_writes_per_phase: 2   # plus human-wait updates

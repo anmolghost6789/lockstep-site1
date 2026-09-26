@@ -1,0 +1,8 @@
+{
+  "description": "Models approved by the AI governance board. A phase-2 ADR may only pin models from this list.",
+  "approved_models": ["claude-opus-5-5", "claude-sonnet-5", "claude-haiku-4-5-20251001"],
+  "prohibited_data_levels_by_model": {
+    "claude-haiku-4-5-20251001": ["restricted"]
+  },
+  "require_gateway": true
+}

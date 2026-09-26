@@ -1,0 +1,14 @@
+version: 1.0
+purpose: One primary artifact per phase, in adlc/, committed to the repository.
+artifacts:
+  - {phase: discover-define,   path: adlc/01-aiprs.md,       template: templates/01-aiprs.template.md,       name: AI Product Requirement Spec}
+  - {phase: architect-design,  path: adlc/02-blueprint.md,   template: templates/02-blueprint.template.md,   name: Agentic Solution Blueprint, companions: [adlc/adr/ADR-NNN-*.md]}
+  - {phase: build-orchestrate, path: adlc/03-units.yaml,     template: templates/03-units.template.yaml,     name: Working Agentic Product (build ledger)}
+  - {phase: evaluate-validate, path: adlc/04-scorecard.json, template: templates/04-scorecard.schema.json,   name: Evaluation Scorecard}
+  - {phase: release-operate,   path: adlc/05-release.md,     template: templates/05-release.template.md,     name: Governed Production Release}
+  - {phase: observe-evolve,    path: adlc/06-backlog.md,     template: templates/06-backlog.template.md,     name: Improvement Backlog}
+validation: scripts/validate_artifact.py --phase <id>
+forbidden:
+  - unfilled template placeholders ({{...}}, TBD, TODO)
+  - pasted restricted data
+  - a second copy of any fact stated in an upstream artifact (reference by ID instead)

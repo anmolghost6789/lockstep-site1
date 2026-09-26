@@ -1,0 +1,19 @@
+# Build Agent — Python dependencies
+# Install with: pip install -r .claude/skills/build-agent/scripts/requirements.txt
+#
+# Package inventory (why each is needed):
+#   openpyxl   — reading .xlsx STTM, data model, and DQ rules workbooks (primary input format)
+#   xlrd       — fallback reader for legacy .xls workbooks (pre-2007 Excel)
+#   pdfplumber — reading .pdf inputs with layout awareness (tables, columns, multi-column docs)
+#   pypdf      — fallback PDF reader; lighter than pdfplumber for simple text extraction
+#   mammoth    — rich .docx → plain text extraction for context and business rules docs
+#   python-docx — reading structured .docx inputs (enterprise_context, project_context, etc.)
+#   chardet    — encoding detection for .csv and .txt files with unknown encoding
+
+openpyxl>=3.1.2,<4.0.0
+xlrd>=2.0.1,<3.0.0
+pdfplumber>=0.11.0,<1.0.0
+pypdf>=4.3.0,<6.0.0
+mammoth>=1.8.0,<2.0.0
+python-docx>=1.1.2,<2.0.0
+chardet>=5.2.0,<6.0.0

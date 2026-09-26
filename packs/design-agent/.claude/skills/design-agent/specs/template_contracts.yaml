@@ -1,0 +1,105 @@
+version: 4.8
+purpose: Workbook template structure, headers, and template-reference-sheet contract.
+template_paths:
+  sttm: .claude/skills/design-agent/templates/workbooks/STTM_TEMPLATE.xlsx
+  data_model: .claude/skills/design-agent/templates/workbooks/DATA_MODEL_TEMPLATE.xlsx
+  dq: .claude/skills/design-agent/templates/workbooks/DQ_TEMPLATE.xlsx
+  er_diagram: .claude/skills/design-agent/templates/workbooks/ER_DIAGRAM_TEMPLATE.xlsx
+common_rules:
+  clear_dummy_data_before_population: true
+  # STTM / DATA_MODEL / DQ templates ship with two sheets:
+  #   1. table_tracker (index sheet, keep row 1 headers, repopulate body with current-run tables)
+  #   2. _template_reference (structural blueprint sheet; clone it per current-run table, then DELETE it before workbook.save)
+  # ER_DIAGRAM template is different: its non-table_tracker sheets (lineage_overview, table_relationships, layer_diagram_data)
+  # are role-named structural sheets and MUST be preserved in the final output.
+  template_reference_sheet_name: _template_reference
+  delete_template_reference_before_save: true
+  # Legacy sample-content indicators (older templates or dummy rows inside table_tracker).
+  # The current templates use _template_reference as the single blueprint sheet, but generators should still
+  # scrub these tokens from any pre-existing detail rows they encounter during migration or when handling
+  # third-party templates.
+  dummy_indicators:
+    - sample
+    - example
+    - prototype
+    - _template_reference
+  preserve_formatting: true
+  populated_detail_rows_require_references: true
+  # Post-save sheet-name validation (fatal on failure):
+  # - No sheet name may start with an underscore in the final workbook.
+  # - Every sheet name (except table_tracker and ER structural sheets) must correspond to a current-run table
+  #   listed in outputs/00_state/execution_plan/generation_order.json.
+  post_save_sheet_name_validation: true
+workbooks:
+  STTM:
+    summary_rows: 1-7
+    detail_header_row: 9
+    detail_start_row: 10
+    detail_columns:
+      - Target Table
+      - Target Column
+      - Role
+      - Target Data Type
+      - Target Nullable
+      - Source Table
+      - Source Column
+      - Source Data Type
+      - Transformation Logic
+      - Filter Conditions
+      - Join Conditions
+      - Column Description
+      - Primary Key
+      - Schema Name
+      - Database Name
+      - References
+      - Comments
+  DATA_MODEL:
+    summary_rows: 1-7
+    detail_header_row: 9
+    detail_start_row: 10
+    detail_columns:
+      - S.No.
+      - Schema Name
+      - Database Name
+      - Table Name
+      - Logical Name
+      - Attribute Name
+      - Data Type
+      - Role
+      - Nullable
+      - Primary Key
+      - Column Description
+      - Ordinal Position
+      - References
+      - Comments
+  DQ:
+    summary_rows: 1-6
+    detail_header_row: 8
+    detail_start_row: 9
+    detail_columns:
+      - S.No.
+      - Schema Name
+      - Database Name
+      - Table Name
+      - Column Name
+      - Data Type
+      - DQ Check
+      - DQ Rule Expression
+      - Criticality
+      - Threshold Value
+      - References
+      - Comments
+  ER_DIAGRAM:
+    summary_rows: 1-8
+    section_title_row: 9
+    detail_header_row: 10
+    detail_start_row: 11
+    sheets:
+      table_tracker:
+        columns: [S. No., Sheet Name, Comments]
+      lineage_overview:
+        columns: [Layer, Table Name, Table Type, Source Tables, Key Columns, Column Count, Description, References]
+      table_relationships:
+        columns: [From Layer, From Table, From Column, Relationship Type, To Layer, To Table, To Column, References]
+      layer_diagram_data:
+        columns: [Entity Name, Layer, Attribute Name, Data Type, PK, FK, FK Reference, References]

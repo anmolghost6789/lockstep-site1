@@ -1,0 +1,19 @@
+{
+  "name": "discovery-agent",
+  "version": "0.3.0",
+  "publisher": "DE Agents",
+  "icon": "search",
+  "description": "Data-engineering discovery: collects bounded evidence, records source revisions and open questions, applies an access boundary, and builds a validated knowledge layer (OKF v0.2) for the agents downstream.",
+  "categories": [
+    "Data engineering",
+    "Discovery",
+    "Knowledge layer"
+  ],
+  "examples": [
+    "Discover this project before we plan delivery",
+    "Assess current ingestion and migration practice",
+    "Build the knowledge layer for the downstream agents"
+  ],
+  "homepage": "",
+  "license": "Proprietary"
+}

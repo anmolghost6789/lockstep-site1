@@ -1,0 +1,32 @@
+{
+  "_comment": "Deploy through MDM to the OS-level managed settings path so users cannot override it. Replace the gateway URL with your own. Check key names against the Claude Code settings reference for your version before rollout.",
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://llm-gateway.acme.example",
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1"
+  },
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Write(adlc/.gates/**)",
+      "Edit(adlc/.gates/**)",
+      "Write(adlc/.audit/**)",
+      "Edit(adlc/.audit/**)",
+      "Read(**/.env)",
+      "Read(**/*.pem)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre_tool_guard.py\""
+          }
+        ]
+      }
+    ]
+  }
+}

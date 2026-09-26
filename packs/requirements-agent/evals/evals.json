@@ -1,0 +1,175 @@
+{
+  "_about": "Gap-first eval scenarios for the Requirements Agent. Each scenario is anchored to a real failure mode the bare model exhibits without the skill. Expected behavior is split into deterministic assertions and semantic review by /evaluate-run's quality reviewer or a human. Paths in deterministic checks are relative to the run's outputs directory.",
+  "fixture_corpus": ["fixtures/corpus/transcript.md", "fixtures/corpus/scope.md", "fixtures/corpus/data_contract.md"],
+  "scenarios": [
+    {
+      "id": "SR-1",
+      "skill": "start-run",
+      "name": "input-eval-surfaces-gaps-and-contradiction",
+      "gap": "Without the skill, the model jumps straight to drafting and never records that retention is contradictory (5y vs 7y) or that 'fast' is unquantified.",
+      "prompt": "Start a run for this corpus and generate BRD and FRD.",
+      "files": ["fixtures/corpus/transcript.md", "fixtures/corpus/scope.md", "fixtures/corpus/data_contract.md"],
+      "expected_behavior": [
+        "Updates input_evaluation.md and state.json; selects BRD and FRD only",
+        "Records the 5-year vs 7-year retention contradiction as an open question / gap",
+        "Flags 'should be fast' as an unquantified requirement",
+        "Detects a PII/compliance signal from the masked contact fields",
+        "Does NOT auto-advance into extraction"
+      ],
+      "deterministic": [
+        {"type": "file_exists", "path": "01_input_evaluation/input_evaluation.md"},
+        {"type": "contains", "path": "01_input_evaluation/input_evaluation.md", "pattern": "(?i)retention"}
+      ],
+      "qualitative_review": [
+        "Retention contradiction is surfaced, not silently resolved",
+        "'fast' is called out as needing a measurable target"
+      ]
+    },
+    {
+      "id": "EX-1",
+      "skill": "extract-requirements",
+      "name": "no-fabricated-kpi-target",
+      "gap": "The bare model invents a plausible on-time-delivery target (e.g. 95%) that no source states.",
+      "prompt": "Extract the analysis layer for this run.",
+      "files": ["fixtures/corpus/transcript.md", "fixtures/corpus/scope.md", "fixtures/corpus/data_contract.md"],
+      "expected_behavior": [
+        "Linked topic pages include the on-time-delivery KPI (KPI-*) with no invented numeric target and an [INSUFFICIENT INPUT] marker",
+        "The linked knowledge graph records the retention conflict",
+        "A linked topic page preserves client ID REQ-014 and its source evidence"
+      ],
+      "deterministic": [
+        {"type": "file_exists", "path": "00_state/knowledge/index.md"}
+      ],
+      "qualitative_review": [
+        "On-time-delivery KPI carries no fabricated target value",
+        "REQ-014 is preserved as a client-canonical source ID"
+      ]
+    },
+    {
+      "id": "BRD-1",
+      "skill": "generate-brd",
+      "name": "happy-path-ids-and-lint-clean",
+      "gap": "Bare model produces a generic BRD with no stable IDs, no KBQ/KPI sections, and leaked template residue.",
+      "prompt": "Generate the BRD for this run.",
+      "files": [],
+      "expected_behavior": [
+        "Writes BRD.md embedding use cases, KBQs, KPIs/metrics, business rules",
+        "Every business requirement carries a stable ID",
+        "No leaked template comments or placeholders",
+        "Ends the turn with a recommendation; does not auto-run the FRD"
+      ],
+      "deterministic": [
+        {"type": "file_exists", "path": "02_deliverables/BRD.md"},
+        {"type": "lint_clean", "path": "02_deliverables/BRD.md"},
+        {"type": "contains", "path": "02_deliverables/BRD.md", "pattern": "(BR-|UC-|KPI-)\\d"}
+      ],
+      "qualitative_review": [
+        "Executive summary is specific to order analytics, not boilerplate"
+      ]
+    },
+    {
+      "id": "BRD-2",
+      "skill": "generate-brd",
+      "name": "no-hallucinated-kpi-target-and-vague-not-laundered",
+      "gap": "Bare model launders 'should be fast' into a requirement verbatim and invents an on-time-delivery target.",
+      "prompt": "Generate the BRD for this run.",
+      "files": [],
+      "expected_behavior": [
+        "On-time-delivery KPI appears without an invented target — marked [INSUFFICIENT INPUT] with an Open Item",
+        "'fast' is not stated as a formal requirement; it is made measurable or flagged",
+        "Every inline marker has a matching Open Items row"
+      ],
+      "deterministic": [
+        {"type": "lint_clean", "path": "02_deliverables/BRD.md"}
+      ],
+      "qualitative_review": [
+        "No numeric KPI target appears that is not sourced",
+        "Vague 'fast' phrasing is not copied into a 'shall' requirement"
+      ]
+    },
+    {
+      "id": "FRD-1",
+      "skill": "generate-frd",
+      "name": "data-requirements-and-failure-handling",
+      "gap": "Bare model omits the masking constraint and the missing-feed failure path.",
+      "prompt": "Generate the FRD for this run.",
+      "files": [],
+      "expected_behavior": [
+        "Data requirements map orders_feed -> fact_orders at entity level",
+        "PII masking appears as a constraint/NFR before warehouse write",
+        "A failure-handling FR covers missing/malformed feed (retain partition + alert)",
+        "Every functional/NFR statement is testable"
+      ],
+      "deterministic": [
+        {"type": "file_exists", "path": "02_deliverables/FRD.md"},
+        {"type": "lint_clean", "path": "02_deliverables/FRD.md"},
+        {"type": "contains", "path": "02_deliverables/FRD.md", "pattern": "(?i)mask"}
+      ],
+      "qualitative_review": [
+        "Failure path (missing feed -> keep prior data + alert) is captured as a requirement"
+      ]
+    },
+    {
+      "id": "URS-1",
+      "skill": "generate-urs",
+      "name": "user-centered-verifiable-atomic",
+      "gap": "Bare model writes implementation-level, compound URS rows with no verification method.",
+      "prompt": "Generate the URS for this run.",
+      "files": [],
+      "expected_behavior": [
+        "Each URS row has a verification method from the enumerated set",
+        "No compound (multi-shall) requirements",
+        "PII/retention rows carry a criticality value"
+      ],
+      "deterministic": [
+        {"type": "file_exists", "path": "02_deliverables/URS.md"},
+        {"type": "lint_clean", "path": "02_deliverables/URS.md"}
+      ],
+      "qualitative_review": [
+        "Requirements are user-outcome level, not solution design",
+        "Verification methods are appropriate to criticality"
+      ]
+    },
+    {
+      "id": "JIRA-1",
+      "skill": "generate-jira-stories",
+      "name": "vertical-slice-and-persona-discipline",
+      "gap": "Bare model decomposes by pipeline stage (trigger/DQ/load) and uses 'the pipeline' or a business stakeholder as the story persona.",
+      "prompt": "Generate the Jira story pack for this run.",
+      "files": [],
+      "expected_behavior": [
+        "Stories are vertical slices (entity/outcome), never per pipeline stage",
+        "Each story persona is a delivery-team role (BA/Developer/Tester/Reviewer), not a system or business stakeholder",
+        "Each story has acceptance criteria and cites REQ-014 where relevant",
+        "Size/Estimate stays TBD (no invented story points)"
+      ],
+      "deterministic": [
+        {"type": "file_exists", "path": "02_deliverables/JIRA.md"},
+        {"type": "lint_clean", "path": "02_deliverables/JIRA.md"}
+      ],
+      "qualitative_review": [
+        "No story titled after a pipeline stage/step/layer",
+        "Persona slot is always a team role; business stakeholders appear in the benefit clause"
+      ]
+    },
+    {
+      "id": "REV-1",
+      "skill": "revise-run",
+      "name": "cascade-propagation-and-id-preservation",
+      "gap": "Bare model edits only the file the user named and leaves derived artifacts inconsistent.",
+      "prompt": "Set the on-time-delivery KPI target to 95% (after BRD and FRD already exist).",
+      "files": [],
+      "expected_behavior": [
+        "Updates the linked KPI topic and the BRD block that owns it",
+        "Marks only dependent FRD/story blocks dirty and applies targeted changes",
+        "Refreshes final traceability from linked pages while preserving all stable IDs",
+        "Does not renumber surviving IDs; deleted entities are removed from owned blocks"
+      ],
+      "deterministic": [],
+      "qualitative_review": [
+        "Every artifact referencing the KPI value is updated to 95% after approval",
+        "Stable IDs are preserved across the revision"
+      ]
+    }
+  ]
+}

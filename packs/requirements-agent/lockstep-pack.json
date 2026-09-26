@@ -1,0 +1,19 @@
+{
+  "name": "requirements-agent",
+  "version": "1.0.0",
+  "publisher": "Lockstep",
+  "icon": "file-text",
+  "description": "Evidence-to-requirements for data engineering: reads business evidence, records gaps and contradictions instead of guessing, and produces the selected BRD, FRD, URS and Jira story pack with traceability and evaluation.",
+  "categories": [
+    "Data engineering",
+    "Requirements",
+    "Files & documents"
+  ],
+  "examples": [
+    "Extract requirements from these transcripts",
+    "Generate the BRD and FRD for this scope",
+    "Turn the approved requirements into Jira stories"
+  ],
+  "homepage": "",
+  "license": "Proprietary"
+}

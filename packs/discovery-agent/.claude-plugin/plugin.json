@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "de-discovery",
+  "displayName": "DE Discovery",
+  "version": "0.3.0",
+  "description": "Evidence-backed discovery, acquisition and ingestion specifications, migration, and current-practice assessment for data engineering projects, producing a dynamic OKF v0.2 knowledge layer.",
+  "author": {
+    "name": "DE Agents"
+  },
+  "keywords": [
+    "data-engineering",
+    "discovery",
+    "databricks",
+    "ingestion",
+    "migration",
+    "research",
+    "okf",
+    "knowledge-layer"
+  ]
+}

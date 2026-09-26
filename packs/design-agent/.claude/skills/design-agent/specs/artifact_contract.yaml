@@ -1,0 +1,38 @@
+version: 4.7
+purpose: Expected output inventory and naming contract.
+output_root: outputs
+no_archive_folder: true
+per_layer_artifacts:
+  - type: STTM
+    path_pattern: outputs/05_artifacts/{layer}/STTM_{layer}.xlsx
+    sheets: table_tracker_plus_one_sheet_per_table_in_layer
+  - type: DATA_MODEL
+    path_pattern: outputs/05_artifacts/{layer}/DATA_MODEL_{layer}.xlsx
+    sheets: table_tracker_plus_one_sheet_per_table_in_layer
+  - type: DQ
+    path_pattern: outputs/05_artifacts/{layer}/DQ_{layer}.xlsx
+    sheets: table_tracker_plus_one_sheet_per_table_in_layer
+per_run_artifacts:
+  - type: ER_DIAGRAM
+    path: outputs/05_artifacts/ER_DIAGRAM.xlsx
+    template: .claude/skills/design-agent/templates/workbooks/ER_DIAGRAM_TEMPLATE.xlsx
+    sheets:
+      - table_tracker
+      - lineage_overview
+      - table_relationships
+      - layer_diagram_data
+optional_artifacts:
+  - type: RISK_MANIFEST
+    path: outputs/RISK_MANIFEST.json
+    condition: FORCE_CONTINUE_used
+excel_file_count_formula: number_of_layers * 3 + 1
+forbidden:
+  - outputs/05_artifacts/{table}/one_workbook_per_table.xlsx
+  - one_workbook_per_table
+  - one_consolidated_workbook_for_all_layers
+  - multiple_er_diagram_workbooks
+  - archive/
+stale_output_safety:
+  scope: outputs/ only
+  declared_file_source: outputs/00_state/execution_plan/file_plan.json
+  unexpected_files_policy: stop_and_ask_before_removing_or_overwriting
