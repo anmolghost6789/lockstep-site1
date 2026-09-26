@@ -1,0 +1,117 @@
+{
+  "description": "Who may approve which gate. Roles resolve from IdP groups (ADLC_GROUPS, set by the VS Code extension from the SSO token) or, if absent, from the static members list.",
+  "identity": {
+    "env": "ADLC_IDENTITY",
+    "fallback": "git config user.email",
+    "groups_env": "ADLC_GROUPS"
+  },
+  "separation_of_duties": true,
+  "group_role_map": {
+    "adlc-product-owners": "product_owner",
+    "adlc-architects": "architect",
+    "adlc-engineers": "engineer",
+    "adlc-qa-leads": "qa_lead",
+    "adlc-release-managers": "release_manager",
+    "adlc-security": "security_officer",
+    "adlc-waiver-approvers": "waiver_approver"
+  },
+  "static_members": {
+    "product_owner": [
+      "priya.nair@acme.example"
+    ],
+    "architect": [
+      "lena.fischer@acme.example"
+    ],
+    "engineer": [
+      "tomas.reyes@acme.example"
+    ],
+    "qa_lead": [
+      "amara.okafor@acme.example"
+    ],
+    "release_manager": [
+      "priya.nair@acme.example"
+    ],
+    "security_officer": [
+      "dev.sharma@acme.example"
+    ],
+    "waiver_approver": [
+      "cto@acme.example"
+    ]
+  },
+  "gates": {
+    "G1": {
+      "phase": "discover-define",
+      "artifact": "adlc/01-aiprs.md",
+      "roles": [
+        "product_owner"
+      ],
+      "min_approvals": 1
+    },
+    "G2": {
+      "phase": "architect-design",
+      "artifact": "adlc/02-blueprint.md",
+      "roles": [
+        "architect"
+      ],
+      "min_approvals": 1
+    },
+    "G3": {
+      "phase": "build-orchestrate",
+      "artifact": "adlc/03-units.yaml",
+      "roles": [
+        "engineer"
+      ],
+      "min_approvals": 1
+    },
+    "G4": {
+      "phase": "evaluate-validate",
+      "artifact": "adlc/04-scorecard.json",
+      "roles": [
+        "qa_lead"
+      ],
+      "min_approvals": 1
+    },
+    "G5": {
+      "phase": "release-operate",
+      "artifact": "adlc/05-release.md",
+      "roles": [
+        "release_manager"
+      ],
+      "min_approvals": 1,
+      "additional_roles_if_risk": {
+        "high": [
+          "security_officer"
+        ],
+        "critical": [
+          "security_officer",
+          "waiver_approver"
+        ]
+      }
+    },
+    "G6": {
+      "phase": "observe-evolve",
+      "artifact": "adlc/06-backlog.md",
+      "roles": [
+        "product_owner"
+      ],
+      "min_approvals": 1
+    }
+  },
+  "waivers": {
+    "roles": [
+      "waiver_approver"
+    ],
+    "require_reason": true,
+    "max_validity_days": 30
+  },
+  "github_teams": {
+    "description": "GitHub team for each role, used to generate CODEOWNERS. Sync these teams from your identity provider.",
+    "product_owner": "@acme/adlc-product-owners",
+    "architect": "@acme/adlc-architects",
+    "engineer": "@acme/adlc-engineers",
+    "qa_lead": "@acme/adlc-qa-leads",
+    "release_manager": "@acme/adlc-release-managers",
+    "security_officer": "@acme/adlc-security",
+    "waiver_approver": "@acme/adlc-waiver-approvers"
+  }
+}

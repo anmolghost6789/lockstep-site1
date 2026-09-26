@@ -1,0 +1,60 @@
+version: 4.7
+purpose: Deterministic validation contract for temporary runtime validators.
+fail_fast_conditions:
+  - missing_expected_excel_file
+  - wrong_output_folder_or_root_file_created
+  - wrong_sheet_structure
+  - unapproved_source_used
+  - same_layer_physical_dependency_without_gate3_exception
+  - populated_detail_row_blank_references
+  - dummy_or_example_data_remaining
+  - unapproved_best_guess
+  - unaddressed_user_instruction
+  - silent_context_hierarchy_override
+validation_groups:
+  pre_table:
+    severity: critical
+    checks:
+      - table_in_approved_layer_architecture
+      - source_columns_exist
+      - transformation_logic_specific
+      - grounding_present
+      - references_planned
+  post_table:
+    severity: critical
+    checks:
+      - sttm_matches_data_model
+      - dq_subset_of_data_model
+      - references_populated
+      - best_guess_matches_risk_manifest
+  post_layer:
+    severity: critical
+    checks:
+      - exact_three_workbooks_per_layer
+      - table_tracker_matches_sheets
+      - no_cross_layer_sheet_leakage
+  review_pre_gate:
+    severity: blocking_before_gate5
+    checks:
+      - all_declared_outputs_linkable
+      - workbooks_readable
+      - no_dummy_data_remaining
+      - no_blank_mandatory_references
+  evaluate_full_evaluation:
+    severity: hard_gate
+    checks:
+      - all_output_contract_checks
+      - all_template_shape_checks
+      - all_traceability_checks
+      - design_to_output_consistency
+      - semantic_business_quality_review
+active_output_rules:
+  output_root: outputs/
+  declared_file_source: outputs/00_state/execution_plan/file_plan.json
+  no_excel_files_in_outputs_root: true
+validation_log:
+  path: outputs/00_state/validation_log.json
+  created_or_updated_by:
+    - 06 - Execute
+    - 07 - Review
+    - 08 - Evaluate

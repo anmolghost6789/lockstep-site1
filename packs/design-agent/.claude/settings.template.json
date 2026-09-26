@@ -1,0 +1,30 @@
+{
+  "env": {
+    "CLAUDE_STREAM_IDLE_TIMEOUT_MS": "600000",
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "1200000",
+    "MAX_THINKING_TOKENS": "4000",
+    "CLAUDE_AUTO_COMPACT_THRESHOLD_PERCENT": "50"
+  },
+  "permissions": {
+    "allow": [
+      "AskUserQuestion",
+      "Bash(python3:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(grep:*)",
+      "Bash(sort:*)",
+      "Bash(unzip:*)",
+      "Bash(zip:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)"
+    ]
+  },
+  "autoMemoryEnabled": true
+}

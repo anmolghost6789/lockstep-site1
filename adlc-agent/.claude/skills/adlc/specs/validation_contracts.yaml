@@ -1,0 +1,34 @@
+version: 1.0
+purpose: Which checks run where, what writes their results, and what a failure blocks.
+checks:
+  structure:
+    runner: scripts/validate_artifact.py --phase <id>
+    result: adlc/.state/validation/<phase>.json
+    blocks: gate request
+  traceability:
+    runner: scripts/validate_artifact.py --phase <id>
+    rule: every Trace reference resolves upstream; phases after 01 must trace
+    blocks: gate request
+  policy_pack:
+    runner: scripts/policy_check.py --phase <id>
+    result: adlc/.state/policy/<phase>.json
+    blocks: gate request (unless a recorded, unexpired waiver exists)
+  runtime_guard:
+    runner: .claude/hooks/pre_tool_guard.py
+    when: every tool call in Claude Code
+    blocks: the tool call
+  previous_gate:
+    runner: scripts/gate_github.py check (github) or scripts/adlc_gate.py check (local)
+    when: phase entry
+    blocks: the phase
+  codeowners:
+    runner: scripts/setup_codeowners.py --check
+    when: /status and first run in a repository
+    blocks: nothing; warns that gates are not routed
+  audit_chain:
+    runner: scripts/audit_log.py verify
+    when: /status
+    blocks: nothing; reported first if broken
+never:
+  - edit a result file by hand
+  - retry a failing check until it passes by changing the artifact's meaning

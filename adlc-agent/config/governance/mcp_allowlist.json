@@ -1,0 +1,37 @@
+{
+  "description": "Only these MCP servers and tools may be called. pre_tool_guard.py blocks any other mcp__* tool call and writes a policy.blocked audit event.",
+  "servers": {
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "allowed_tools": [
+        "*"
+      ],
+      "phases": [
+        "discover-define",
+        "architect-design",
+        "observe-evolve"
+      ]
+    },
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "allowed_tools": [
+        "*"
+      ],
+      "phases": [
+        "*"
+      ]
+    },
+    "kyc-system": {
+      "url": "https://mcp.internal.acme.example/kyc",
+      "allowed_tools": [
+        "read_*",
+        "update_case_dryrun"
+      ],
+      "phases": [
+        "build-orchestrate",
+        "evaluate-validate"
+      ],
+      "data_classification": "confidential"
+    }
+  }
+}

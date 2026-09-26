@@ -1,0 +1,23 @@
+# Build ledger. One entry per unit; one entry per bolt inside it.
+intent_id: "{{intent_id}}"
+blueprint_sha256: "{{sha256 from adlc/.gates/G2.json}}"
+branch_prefix: "adlc/{{intent_id}}/"
+units:
+  - id: UNIT-001
+    name: "{{unit name}}"
+    status: planned            # planned | building | in_review | accepted | rejected
+    built_by: "{{orchestrator | bolt-builder-1}}"
+    trace: [FR-001]
+    bolts:
+      - id: BOLT-001
+        goal: "{{what this bolt delivers}}"
+        files_changed: 0
+        tests_run: 0
+        tests_passed: 0
+        commit: "{{sha}}"
+        trace: [FR-001]
+    review:
+      pull_request: "{{url}}"
+      reviewer: "{{engineer identity}}"
+      decision: "{{accepted | rejected}}"
+      at: "{{ISO-8601 +05:30}}"

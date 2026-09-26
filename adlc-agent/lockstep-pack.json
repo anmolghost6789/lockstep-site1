@@ -1,0 +1,21 @@
+{
+  "name": "adlc",
+  "description": "Agentic Development Lifecycle pack: six phases from business intent to production (discover, design, build, evaluate, release, observe), each ending in a named-role approval gate, with templates, contracts, policy hooks and subagents.",
+  "homepage": "",
+  "license": "Proprietary",
+  "version": "1.1.0",
+  "publisher": "Lockstep",
+  "icon": "layers",
+  "categories": [
+    "Software delivery",
+    "Governance",
+    "Regulated industries"
+  ],
+  "examples": [
+    "Turn this business goal into a requirements spec",
+    "Draft the Level-1 plan and architecture decisions",
+    "Build the approved units in bolts, with tests",
+    "Evaluate the build against the spec's thresholds",
+    "Prepare a governed production release"
+  ]
+}

@@ -1,0 +1,20 @@
+﻿{
+  "workflowType": "design",
+  "outputOrder": ["STTM", "DATA_MODEL", "DQ", "ERD"],
+  "generationOrder": ["STTM", "DATA_MODEL", "DQ", "ERD"],
+  "uiSteps": [
+    {"id": "discover-sources", "label": "Discover Sources", "description": "Confirms source systems, tables, and gaps", "outcome": "produces source decisions"},
+    {"id": "design-architecture", "label": "Data Design", "description": "Maps business needs to target architecture", "outcome": "produces design and lineage decisions"},
+    {"id": "plan-execution", "label": "Plan Generation", "description": "Sets output order and validation checks", "outcome": "produces generation plan"},
+    {"id": "generate-artifacts", "label": "Generate Artifacts", "description": "Creates STTM, data model, DQ, and ERD outputs", "outcome": "produces artifact package", "outputIds": ["STTM", "DATA_MODEL", "DQ", "ERD"]},
+    {"id": "evaluate-design", "label": "Evaluate Design", "description": "Scores deterministic and semantic quality", "outcome": "produces evaluation report"},
+    {"id": "close-design-run", "label": "Close Run", "description": "Captures learnings and cleans scratch files", "outcome": "completes the run"}
+  ],
+  "outputs": [
+    {"id": "STTM", "label": "STTM", "name": "Source-to-target mappings", "phaseId": "generate-artifacts", "folder": "outputs", "stems": ["sttm"]},
+    {"id": "DATA_MODEL", "label": "Data Model", "name": "Layered data model workbooks", "phaseId": "generate-artifacts", "folder": "outputs", "stems": ["data_model"]},
+    {"id": "DQ", "label": "DQ", "name": "Data quality workbooks", "phaseId": "generate-artifacts", "folder": "outputs", "stems": ["dq"]},
+    {"id": "ERD", "label": "ERD", "name": "ER diagram workbook", "phaseId": "generate-artifacts", "folder": "outputs", "stems": ["er_diagram", "erd"]}
+  ],
+  "stateFile": "outputs/00_state/run_state.json"
+}

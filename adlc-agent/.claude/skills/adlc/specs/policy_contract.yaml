@@ -1,0 +1,20 @@
+version: 1.0
+purpose: Policy checks that must pass before a gate can be requested.
+runner: scripts/policy_check.py --phase <id>
+report: adlc/.state/policy/<phase>.json
+checks:
+  no_secrets:            {kind: local,    what: credential patterns in lifecycle artifacts}
+  pii_scan:              {kind: local,    what: email, card (Luhn), SSN, Aadhaar and PAN patterns}
+  trace_ids_present:     {kind: local,    what: validate_artifact.py passed for this phase}
+  model_pins_approved:   {kind: local,    what: phase model pins are in model_policy.approved_models}
+  mcp_allowlist:         {kind: local,    what: every .mcp.json server is allow-listed}
+  tests_per_bolt:        {kind: local,    what: every bolt has tests_passed > 0}
+  evaluator_independence: {kind: local,   what: evaluator is not a builder of the code under test}
+  thresholds_from_aiprs: {kind: local,    what: every metric traces to an NFR or SC}
+  min_eval_cases:        {kind: local,    what: case count meets evaluation.min_eval_cases}
+  rollback_plan:         {kind: local,    what: Rollback Plan section is substantive}
+  versions_pinned:       {kind: local,    what: no latest/main/HEAD/* in Versions}
+  license_scan:          {kind: external, evidence: adlc/.state/evidence/license_scan.json}
+  sbom_present:          {kind: external, evidence: adlc/.state/evidence/sbom_present.json}
+external_evidence_format: '{"passed": true, "tool": "<scanner>", "run_url": "<ci link>", "findings": []}'
+runtime_enforcement: .claude/hooks/pre_tool_guard.py (every tool call)

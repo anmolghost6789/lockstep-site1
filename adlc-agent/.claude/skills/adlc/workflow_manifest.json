@@ -1,0 +1,137 @@
+{
+  "workflowType": "adlc",
+  "version": "1.0.0",
+  "stateFile": "adlc/.state/run_state.json",
+  "auditFile": "adlc/.audit/audit.jsonl",
+  "gatesDir": "adlc/.gates",
+  "phases": [
+    {
+      "id": "discover-define",
+      "number": "01",
+      "label": "Discover & Define",
+      "skill": ".claude/skills/discover-define/SKILL.md",
+      "artifact": "adlc/01-aiprs.md",
+      "template": ".claude/skills/adlc/templates/01-aiprs.template.md",
+      "gate": "G1",
+      "requiredSections": [
+        "Intent",
+        "Personas",
+        "User Stories",
+        "Functional Requirements",
+        "Non-Functional Requirements",
+        "Risks and Constraints",
+        "Success Criteria",
+        "Open Questions"
+      ],
+      "idPrefixes": [
+        "P",
+        "US",
+        "FR",
+        "NFR",
+        "RISK",
+        "SC"
+      ]
+    },
+    {
+      "id": "architect-design",
+      "number": "02",
+      "label": "Architect & Design",
+      "skill": ".claude/skills/architect-design/SKILL.md",
+      "artifact": "adlc/02-blueprint.md",
+      "template": ".claude/skills/adlc/templates/02-blueprint.template.md",
+      "gate": "G2",
+      "requiredSections": [
+        "Context",
+        "Level-1 Plan",
+        "Agent Topology",
+        "Model Selection",
+        "Knowledge and RAG Design",
+        "Tools and MCP Integration",
+        "Security and Governance",
+        "Decisions"
+      ],
+      "idPrefixes": [
+        "UNIT",
+        "AGT",
+        "ADR"
+      ]
+    },
+    {
+      "id": "build-orchestrate",
+      "number": "03",
+      "label": "Build & Orchestrate",
+      "skill": ".claude/skills/build-orchestrate/SKILL.md",
+      "artifact": "adlc/03-units.yaml",
+      "template": ".claude/skills/adlc/templates/03-units.template.yaml",
+      "gate": "G3",
+      "requiredKeys": [
+        "intent_id",
+        "blueprint_sha256",
+        "units"
+      ],
+      "idPrefixes": [
+        "UNIT",
+        "BOLT"
+      ]
+    },
+    {
+      "id": "evaluate-validate",
+      "number": "04",
+      "label": "Evaluate & Validate",
+      "skill": ".claude/skills/evaluate-validate/SKILL.md",
+      "artifact": "adlc/04-scorecard.json",
+      "template": ".claude/skills/adlc/templates/04-scorecard.schema.json",
+      "gate": "G4",
+      "requiredKeys": [
+        "intent_id",
+        "evaluated_build",
+        "metrics",
+        "verdict"
+      ],
+      "idPrefixes": [
+        "EVAL"
+      ]
+    },
+    {
+      "id": "release-operate",
+      "number": "05",
+      "label": "Release & Operate",
+      "skill": ".claude/skills/release-operate/SKILL.md",
+      "artifact": "adlc/05-release.md",
+      "template": ".claude/skills/adlc/templates/05-release.template.md",
+      "gate": "G5",
+      "requiredSections": [
+        "Release Summary",
+        "Versions",
+        "Deployment Plan",
+        "Rollback Plan",
+        "Runbook",
+        "Risk Assessment",
+        "Readiness Checklist"
+      ],
+      "idPrefixes": [
+        "REL"
+      ]
+    },
+    {
+      "id": "observe-evolve",
+      "number": "06",
+      "label": "Observe & Evolve",
+      "skill": ".claude/skills/observe-evolve/SKILL.md",
+      "artifact": "adlc/06-backlog.md",
+      "template": ".claude/skills/adlc/templates/06-backlog.template.md",
+      "gate": "G6",
+      "requiredSections": [
+        "Observation Window",
+        "Outcome vs Success Criteria",
+        "Incidents and Drift",
+        "Backlog",
+        "Next Intent"
+      ],
+      "idPrefixes": [
+        "OBS",
+        "BL"
+      ]
+    }
+  ]
+}

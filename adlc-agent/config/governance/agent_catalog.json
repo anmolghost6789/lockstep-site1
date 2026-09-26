@@ -1,0 +1,21 @@
+{
+  "description": "Agents and models the router may assign work to. Only approved entries are used. Cost is relative (1 = cheapest). Data levels follow config/project_config.json > data_classification.",
+  "agents": [
+    {"id": "copilot-agent-sonnet", "harness": "github-copilot", "model": "claude-sonnet-5", "capabilities": ["requirements", "design", "coding", "testing", "docs", "review"], "max_data_level": "confidential", "cost": 3, "approved": true},
+    {"id": "copilot-agent-opus", "harness": "github-copilot", "model": "claude-opus-5-5", "capabilities": ["requirements", "design", "architecture", "coding", "testing", "evaluation", "review", "security"], "max_data_level": "confidential", "cost": 8, "approved": true},
+    {"id": "claude-code-haiku", "harness": "claude-code", "model": "claude-haiku-4-5-20251001", "capabilities": ["coding", "testing", "docs"], "max_data_level": "internal", "cost": 1, "approved": true},
+    {"id": "self-hosted-coder", "harness": "claude-code", "model": "client-hosted-model", "capabilities": ["coding", "testing"], "max_data_level": "restricted", "cost": 2, "approved": false}
+  ],
+  "phase_needs": {
+    "discover-define": ["requirements"],
+    "architect-design": ["architecture"],
+    "build-orchestrate": ["coding", "testing"],
+    "evaluate-validate": ["evaluation"],
+    "release-operate": ["security", "docs"],
+    "observe-evolve": ["requirements"]
+  },
+  "rules": {
+    "evaluator_must_differ_from_builder": true,
+    "prefer": "lowest_cost_that_meets_needs"
+  }
+}

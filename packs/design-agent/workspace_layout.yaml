@@ -1,0 +1,103 @@
+# Playground UI + run scaffold contract for the design skill package.
+
+version: 1
+
+# Design owns its own progress.json, like every other agent. The playground seeds the
+# baseline once at run creation (seed_progress.py --seed); standalone package runs may
+# call seed_progress.py --seed once from the workspace root if root progress.json is missing.
+# The backend stays a GENERIC progress.json reader.
+# The agent rewrites progress.json at each phase boundary (alongside its internal
+# outputs/00_state/run_state.json ledger) per .claude/skills/design-agent/utilities/progress-contract.md.
+# The lean progress.json carries the optional awaiting_user_action / current_stage fields
+# the backend forwards verbatim. No per-agent backend derivation; run_state.json stays internal.
+# Bookkeeping is capped at two writes per phase (see CLAUDE.md principle 14).
+#
+# outputs/ is the single working tree: the agent writes each user-facing deliverable
+# directly into its numbered outputs/ folder (01_inputs .. 06_evaluation), and agent-internal
+# state into outputs/00_state/. There is no per-run folder and no publish/mirror step.
+progress:
+  script: .claude/skills/design-agent/scripts/seed_progress.py
+  file: progress.json
+
+inputs:
+  - id: instructions
+    label: Instructions
+    desc: Run-specific directives and file-usage rules
+    icon: FileText
+  - id: requirements
+    label: Requirements
+    desc: BRDs, scope, entities, acceptance criteria
+    icon: FileText
+  - id: source_inventory
+    label: Source inventory
+    desc: Source systems, schemas, samples, catalogs
+    icon: Database
+  - id: additional_documents
+    label: Additional documents
+    desc: Business rules, KPIs, KBQs, DQ requirements, and any other additional docs
+    icon: BookOpen
+
+context_scaffold:
+  - context/guidance
+  - context/branding
+  - context/reference
+
+context:
+  - id: guidance
+    label: Guidance
+    folderPath: context/guidance/
+    desc: Durable enterprise, domain, and project rules
+    icon: BookOpen
+    children:
+      - id: enterprise_context
+        label: Enterprise
+        desc: Org-wide standards, policies
+        icon: FileText
+        pathMatch: enterprise
+      - id: domain_context
+        label: Domain
+        desc: Domain data standards
+        icon: BookOpen
+        pathMatch: domain
+      - id: project_context
+        label: Project
+        desc: Project charter, scope
+        icon: ScrollText
+        pathMatch: project
+  - id: branding
+    label: Branding
+    folderPath: context/branding/
+    desc: Logos, DOCX export rules
+    icon: Image
+  - id: reference
+    label: Reference
+    folderPath: context/reference/
+    desc: Prior examples, standards
+    icon: FolderOpen
+
+project_context:
+  - id: enterprise_context
+    label: Enterprise
+    description: Org-wide standards, policies, glossaries
+    folderPath: context/guidance/
+    icon: FileText
+  - id: domain_context
+    label: Domain
+    description: Domain-specific data standards and terminologies
+    folderPath: context/guidance/
+    icon: BookOpen
+  - id: project_context
+    label: Project
+    description: Project charter, scope, stakeholder notes
+    folderPath: context/guidance/
+    icon: ScrollText
+  - id: branding
+    label: Branding
+    description: Logos, color palette, DOCX export rules
+    folderPath: context/branding/
+    icon: Image
+  - id: reference
+    label: Reference material
+    description: Prior deliverables, examples, standards, and additional material
+    folderPath: context/reference/
+    icon: FolderOpen

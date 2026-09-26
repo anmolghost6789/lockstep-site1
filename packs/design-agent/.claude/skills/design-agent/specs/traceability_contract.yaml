@@ -1,0 +1,29 @@
+version: 4.7
+purpose: Row-level References column and evidence registry contract.
+grain: row_level
+evidence_registry: outputs/00_state/traceability/evidence_registry.json
+reference_delimiter: "; "
+mandatory_for_populated_detail_rows: true
+blank_reference_failure: critical
+allowed_prefixes:
+  - INPUT
+  - SRC
+  - BRD
+  - RULE
+  - KPI
+  - KBQ
+  - PRODUCT
+  - DQREQ
+  - CTX
+  - SUPPORT
+  - HUMAN
+  - CONFIG
+  - PKG
+  - REFSTORE
+  - INFERRED
+  - RISK
+special_rules:
+  inferred_requires_supporting_evidence: true
+  best_guess_requires_risk_reference: true
+  audit_rows_use_config_or_pkg_reference: true
+  surrogate_key_rows_use_config_and_design_reference: true

@@ -1,0 +1,7 @@
+adlc/.state/runtime_scratch/
+adlc/.state/eval/raw/
+inputs/**/*
+!inputs/README.md
+!inputs/instructions/intent.example.md
+.claude/settings.local.json
+__pycache__/

@@ -1,0 +1,21 @@
+{
+  "name": "design-agent",
+  "description": "Data-engineering design agent: turns business requirements and source inventories into STTM, data model, data quality and ER diagram workbooks, with evaluation, traceability and a governed reference store.",
+  "homepage": "",
+  "license": "Proprietary",
+  "version": "1.0.0",
+  "publisher": "Lockstep",
+  "icon": "database",
+  "categories": [
+    "Data engineering",
+    "Design",
+    "Files & documents"
+  ],
+  "examples": [
+    "Turn these requirements into an STTM workbook",
+    "Design the data model for these sources",
+    "Generate data quality rules for this pipeline",
+    "Draw the ER diagram for this model",
+    "Evaluate the design against the requirements"
+  ]
+}

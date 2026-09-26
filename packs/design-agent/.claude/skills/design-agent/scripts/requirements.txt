@@ -1,0 +1,12 @@
+# Design Agent — script dependencies
+# Install with: pip install -r .claude/skills/design-agent/scripts/requirements.txt
+#
+# Package inventory (why each is needed):
+#   openpyxl — template-based workbook generation (generate_workbooks.py) and
+#              header verification (verify_workbook_headers.py,
+#              verify_artifact_semantics.py, generate_column_mappings.py)
+#   sqlglot  — DQ Rule Expression SQL parsing in verify_artifact_semantics.py
+#              (wraps each bare predicate as SELECT 1 FROM t WHERE (...) and parses it)
+
+openpyxl>=3.1.2,<4.0.0
+sqlglot>=23.0.0

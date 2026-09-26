@@ -1,0 +1,45 @@
+{
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "CLAUDE_AUTO_COMPACT_THRESHOLD_PERCENT": "50"
+  },
+  "permissions": {
+    "allow": [
+      "AskUserQuestion",
+      "Bash(python3 .claude/skills/adlc/scripts/*:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Write(adlc/.gates/**)",
+      "Edit(adlc/.gates/**)",
+      "Write(adlc/.audit/**)",
+      "Edit(adlc/.audit/**)",
+      "Bash(git push --force:*)",
+      "Bash(rm -rf adlc:*)",
+      "Read(**/.env)",
+      "Read(**/*.pem)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|mcp__.*",
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre_tool_guard.py\"" }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/post_tool_audit.py\"" }]
+      }
+    ]
+  },
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": ["atlassian", "github"]
+}
